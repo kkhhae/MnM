@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <link rel="profile" href="#">
+
+   
+    <title>영화 웹사이트</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="../static/includes/plugins.css" />
+    <link rel="stylesheet" href="../static/includes/style.css" />
+
+  <script src="../static/includes/js/custom.js"></script>
+  <script src="../static/includes/js/jquery.js"></script>
+  <script src="../static/includes/js/plugins.js"></script>
+  <script src="../static/includes/js/plugins2.js"></script>
+
+</head>
+<body>
+
+<header class="ht-header">
+    <div class="container">
+        <nav class="navbar navbar-default navbar-custom">
+            <!-- 브랜드와 토글 버튼 -->
+            <div class="navbar-header logo">
+                <div class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">home</span>
+                    <div id="nav-icon1">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <a href="home.html"><img class="logo" src="../static/imgs/logo.png" alt="" width="119" height="58"></a>
+            </div>
+            <!-- 네비게이션 메뉴 -->
+            <div class="collapse navbar-collapse flex-parent" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav flex-child-menu menu-left">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                </ul>
+
+                
+                <div>
+                    <ul class="nav navbar-nav flex-child-menu menu-right">
+                        <li class="dropdown first">
+                            <a class="btn btn-default dropdown-toggle lv1" data-toggle="dropdown" data-hover="dropdown">
+                            </a>
+                        </li>
+                        <li class="searchLink"><a href="#">검색</a></li>
+                        <li><a href="#">로그인</a></li>
+                        <li><a href="#">회원가입</a></li>
+
+                        <!-- <li class="searchLink"><a href="movie/searchList.html">검색</a></li>
+                        <li><a href="member/login.html">로그인</a></li>
+                        <li><a href="member/signup.html">회원가입</a></li> -->
+
+                        <li><img src="../static/includes/images/bell.png" height="50px" width="50px" ></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <!--  검색 팝업 창 -->
+    <div class="login-wrapper" id="search-content" style="overflow-y: scroll;">
+        <div class="login-content">
+            <a href="#" class="close">x</a>
+            <form method="GET">
+                <h3>검색</h3>
+                <div class="search_container">
+                    <select name="sel" style="flex: 2;">
+                        <option value="movie_title">영화</option>
+                        <option value="member_mbti">MBTI</option>
+                        <option value="member_user">유저</option>
+                    </select>
+                    <input type="text" name="keyword" placeholder="영화, MBTI 또는 유저를 입력후 Enter입력" style="flex: 8;">
+                    <div class="hidden">
+                        <button type="submit">검색</button>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <br>
+            <br>
+        </div>
+    </div>
+
+    <!--  로그인 -->
+    <div class="login-wrapper" id="login-content">
+        <div class="login-content">
+            <br>
+            <br>
+            <br>
+            <a href="#" class="close">x</a>
+            <h3>로그인</h3>
+            <form method="post" name="LoginForm" onsubmit="return LoginFormCheck()">
+                <div class="row">
+                    <label for="username">
+                        ID(Email):
+                        <input type="text" name="member_email" placeholder="Email을 입력하세요" required="required" />
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="password">
+                        Password:
+                        <input type="password" name="member_pw" placeholder="비밀번호를 입력하세요"  required="required" />
+                    </label>
+                </div>
+                <div class="container">
+                    <nav class="navbar navbar-default navbar-custom">
+                        <div class="collapse navbar-collapse flex-parent" id="bs-example-navbar-collapse-1">
+                            <div class="pwmodifyLink"><a href="member/pw_modify.html" class="pwmodifyLink">비밀번호 찾기</a></div>
+                        </div>
+                    </nav>
+                </div>
+                <div class="row">
+                    <button type="submit">로그인</button>
+                </div>
+            </form>
+            <br>
+            <br>
+            <br>
+        </div>
+    </div>
+
+    <!-- 비밀번호 찾기 -->
+    <div class="login-wrapper" id="pwmodify-content" style="overflow-y: scroll;">
+        <div class="login-content">
+            <br>
+            <br>
+            <br>
+            <a href="#" class="close">x</a>
+            <h3>비밀번호 찾기</h3>
+            <form method="post" name="pwCheckForm" onsubmit="return pwCheck()">
+                <div class="row">
+                    <label for="email">
+                        이메일
+                        <input class="member_email_pw" type="text" name="member_email" id="member_email_pw">
+                        <span id="val-check-warn_pw"></span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="emailCheck">
+                        인증번호
+                        <button type="button" id="mail_Check_Btn_pw" >인증번호 받기</button>
+                        <input type="text" class="mail_Check_Input_pw" name="mail_Check_Input" placeholder="인증번호 6자리 입력" disabled="disabled" maxlength="6">
+                        <!-- 인증번호 일치여부 확인 -->
+                        <span id="mail-check-warn_pw"></span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="newPw">
+                        새 비밀번호
+                        <input type="password" name="member_pw" id="member_pw_pw"  disabled="disabled">
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <button type="submit">수정완료</button>
+                    </label>
+                </div>
+            </form>
+            <button type="button" onclick="window.location='/src/main/resources/templates/home.html'">취소</button> <!-- 추후 팝업창 닫기로 변경 -->
+            <br>
+            <br>
+            <br>
+        </div>
+    </div>
+
+    <!-- 회원가입 -->
+    <div class="login-wrapper" id="signup-content" style="height: 1000px; overflow-y: scroll;">
+        <div class="login-content">
+            <a href="#" class="close">x</a>
+            <br>
+            <br>
+            <br>
+            <h3>회원가입</h3>
+            <form method="post" name="inputForm" onsubmit="return inputCheck()">
+                <div class="row">
+                    <label for="email">
+                        이메일
+                        <input class="val_Check_Input" type="text" name="member_email" id="member_email" placeholder="email" autofocus />
+                        <button type="button" id="val_Check_Btn" >중복검사</button>
+                        <span id="val-check-warn"></span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="emailCheck">
+                        이메일 인증번호
+                        <input type="text" class="mail_Check_Input" name="mail_Check_Input" placeholder="인증번호 6자리 입력" disabled="disabled" maxlength="6">
+                        <button type="button">인증번호 받기</button>
+                        <span id="mail-check-warn"></span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="password">
+                        Password:
+                        <input type="password" name="member_pw" id="member_pw" disabled="disabled">
+                    </label>
+                    <label for="nickname">
+                        NickName:
+                        <input type="text" name="member_nickname" id="member_nickname" disabled="disabled">
+                    </label>
+                </div>
+                <div class="row">
+                    <div>
+                        <div>MBTI</div>
+                        <div>
+                            <input type="radio" name="member_mbti" value="intj" disabled="disabled">INTJ
+                            <input type="radio" name="member_mbti" value="intp" disabled="disabled">INTP
+                            <input type="radio" name="member_mbti" value="entj" disabled="disabled">ENTJ
+                            <input type="radio" name="member_mbti" value="entp" disabled="disabled">ENTP
+                            <input type="radio" name="member_mbti" value="infj" disabled="disabled">INFJ
+                            <input type="radio" name="member_mbti" value="infp" disabled="disabled">INFP
+                            <input type="radio" name="member_mbti" value="enfj" disabled="disabled">ENFJ
+                            <input type="radio" name="member_mbti" value="enfp" disabled="disabled">ENFP
+                            <br/>
+                            <input type="radio" name="member_mbti" value="istj" disabled="disabled">ISTJ
+                            <input type="radio" name="member_mbti" value="isfj" disabled="disabled">ISFJ
+                            <input type="radio" name="member_mbti" value="estj" disabled="disabled">ESTJ
+                            <input type="radio" name="member_mbti" value="esfj" disabled="disabled">ESFJ
+                            <input type="radio" name="member_mbti" value="istp" disabled="disabled">ISTP
+                            <input type="radio" name="member_mbti" value="isfp" disabled="disabled">ISFP
+                            <input type="radio" name="member_mbti" value="estp" disabled="disabled">ESTP
+                            <input type="radio" name="member_mbti" value="esfp" disabled="disabled">ESFP
+                            <br/>
+                            <input type="radio" name="member_mbti" value="no" disabled="disabled">모름
+                        </div>
+                    </div>
+                </div>
+                <!-- 약관 동의 -->
+                <div class="row">
+                    <label for="checkboxForm">
+                        <input type="checkbox" id="checkAll" >
+                        전체동의
+                        <br/>
+                        <input type="checkbox" name="member_agreed" value="1">
+                        <!-- 약관 상세페이지 추후 ... -->
+                        M&M 이용약관  <a href="" style="color: blue; font-size: 8px;">더보기</a>
+                        <br/>
+                        <input type="checkbox" name="member_agreed" value="1">
+                        개인정보 수집 및 이용  <a href="" style="color: blue; font-size: 8px;">더보기</a>
+                    </label>
+                </div>
+                <!-- 회원가입 버튼  -->
+                <div class="row">
+                    <!-- 입력된 정보 가지고 form의 action 위치로 이동 : /member/signup 컨트롤러 PostMapping("signup")-->
+                    <input value="회원가입" >
+                </div>
+            </form>
+            <br>
+            <br>
+            <br>
+        </div>
+    </div>
+</header>
+
+
+<div class="container" style="background-image: url(../static/includes/images/uploads/error-bg.jpg); width: 100%;" >
+
+  <div class="row" style="margin-top: 10%;">
+      <h2 style="font-size: 25px; color: white; text-align: left; margin-left: 50px">추천영화</h2>
+      
+        <div class="col-md-3">
+            <div class="movie-item" id="movie1" style="margin-left: 10%;">
+                <div class="mv-img">
+                    <img src="../static/imgs/movie/엘리멘탈.jpeg" alt="" style="width: 90%; height: 385px; opacity: 0.8; margin: auto;">
+                </div>
+                <div class="title-in">
+                    <h4 style="color: white;">엘리멘탈</h4>
+                    <p><i class="ion-android-star"></i><span>8.6 / 10</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="movie-item" id="movie2">
+                <div class="mv-img">
+                    <img src="../static/imgs/movie/샤잠.jpeg" alt="" style="width: 80%; height: 385px; opacity: 0.8;margin: auto;">
+                </div>
+                <div class="title-in">
+                    <h4 style="color: white;">샤잠! 신들의 분노</h4>
+                    <p><i class="ion-android-star"></i><span>6.1 / 10</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="movie-item" id="movie2">
+              <div class="mv-img">
+                  <img src="../static/imgs/movie/스파이더맨.jpeg" alt="" style="width: 80%; height: 385px; opacity: 0.8;margin: auto;">
+              </div>
+              <div class="title-in">
+                  <h4 style="color: white;">스파이더맨: 어크로스 더 유니버스</h4>
+                  <p><i class="ion-android-star"></i><span>8.0 / 10</span></p>
+              </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="movie-item" id="movie2">
+              <div class="mv-img">
+                  <img src="../static/imgs/movie/애스터로이드시티.jpeg" alt="" style="width: 80%; height: 385px; opacity: 0.8;margin: auto;">
+              </div>
+              <div class="title-in">
+                  <h4 style="color: white;">애스터로이드 시티</h4>
+                  <p><i class="ion-android-star"></i><span>6.0 / 10</span></p>
+              </div>
+          </div>
+        </div>
+        
+
+      </div>
+      <br>
+  </div>
+</div>
+
+
+<div class="movie-items">
+  <div class="container">
+    <div class="row ipad-width">
+      <!--  전체 페이지 div영역 , 터치 XXX -->
+
+
+      <div class="title-hd">
+        <h2 >전체영화</h2>
+        <!-- # : 최신 영화 리스트 페이지로 이동할 곳 (카테고리 추가 후 최신영화리스트 출력-->
+        <a th:href="@{/movie/list}" th:text="'영화 더보기' " class="viewall"><i class="ion-ios-arrow-right"></i></a>
+      </div>
+      <br>
+
+      <div class="tab-content">
+          <div class="blog-it-infor">
+              <div class="row">
+                  <div class="slick-multiItem">
+
+                      <div class="slide-it">
+                          <div class="movie-item">
+                              <div class="mv-img">
+                                  <img src="../static/imgs/movie/밀수.jpeg" alt="" style="width: 100%; height: 400px;">
+                              </div>
+                              <div class="hvr-inner">
+                                  <a href="https://movie.daum.net/moviedb/main?movieId=147080">
+                                      <i class="ion-android-arrow-dropright">상세정보</i>
+                                  </a>
+                              </div>
+                              <div class="title-in">
+                                  <h6><a>밀수</a></h6>
+                                  <p><i class="ion-android-star"></i><span>7.1 / 10</span></p>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div class="slide-it">
+                          <div class="movie-item">
+                              <div class="mv-img">
+                                  <img src="../static/imgs/movie/오펜하이머.jpeg" alt="" style="width: 100%; height: 400px;">
+                              </div>
+                              <div class="hvr-inner">
+                                  <a href="https://movie.daum.net/moviedb/main?movieId=158260">
+                                      <i class="ion-android-arrow-dropright">상세정보</i>
+                                  </a>
+                              </div>
+                              <div class="title-in">
+                                  <h6><a>오펜하이머</a></h6>
+                                  <p><i class="ion-android-star"></i><span>7.2 / 10</span></p>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div class="slide-it">
+                        <div class="movie-item">
+                            <div class="mv-img">
+                                <img src="../static/imgs/movie/슈퍼마리오.jpeg" alt="" style="width: 100%; height: 400px;">
+                            </div>
+                            <div class="hvr-inner">
+                                <a href="https://movie.daum.net/moviedb/main?movieId=154241">
+                                    <i class="ion-android-arrow-dropright">상세정보</i>
+                                </a>
+                            </div>
+                            <div class="title-in">
+                                <h6><a>슈퍼 마리오 브라더스</a></h6>
+                                <p><i class="ion-android-star"></i><span>8.1 / 10</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide-it">
+                      <div class="movie-item">
+                          <div class="mv-img">
+                              <img src="../static/imgs/movie/엘리멘탈.jpeg" alt="" style="width: 100%; height: 400px;">
+                          </div>
+                          <div class="hvr-inner">
+                              <a href="https://movie.daum.net/moviedb/main?movieId=163777">
+                                  <i class="ion-android-arrow-dropright">상세정보</i>
+                              </a>
+                          </div>
+                          <div class="title-in">
+                              <h6><a>엘리멘탈</a></h6>
+                              <p><i class="ion-android-star"></i><span>8.6 / 10</span></p>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="slide-it">
+                    <div class="movie-item">
+                        <div class="mv-img">
+                            <img src="../static/imgs/movie/스파이더맨.jpeg" alt="" style="width: 100%; height: 400px;">
+                        </div>
+                        <div class="hvr-inner">
+                            <a href="https://movie.daum.net/moviedb/main?movieId=136532">
+                                <i class="ion-android-arrow-dropright">상세정보</i>
+                            </a>
+                        </div>
+                        <div class="title-in">
+                            <h6><a>스파이더맨: 어크로스 더 유니버스</a></h6>
+                            <p><i class="ion-android-star"></i><span>8.0 / 10</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+      <br>
+      <hr style="background-color : grey"/>
+      <br>
+
+      <div class="title-hd">
+        <h2>MBTI 추천영화</h2>
+      </div>
+      <br>
+      <div class="tab-content">
+          <div class="blog-it-infor">
+              <div class="row" style="display: block; position: relative; height: 100%;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: grey; text-align: center; color: black; padding: 20px;">
+                  <h2 style="margin-top: 18%;">로그인 후 이용 가능합니다</h2>
+                </div>
+
+                  <div class="slick-multiItem" style="opacity: 0.2;">
+
+                        <div class="slide-it">
+                            <div class="movie-item">
+                                <div class="mv-img">
+                                    <img href="../static/imgs/question.png" alt="" style="width: 100%; height: 400px;">
+                                </div>
+                                
+                                <div class="title-in">
+                                    <h6><a>MBTI 추천받기</a></h6>
+                                    <p><i class="ion-android-star"></i><span>? / ?</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slide-it">
+                          <div class="movie-item">
+                              <div class="mv-img">
+                                  <img href="../static/imgs/question.png" alt="" style="width: 100%; height: 400px;">
+                              </div>
+                              
+                              <div class="title-in">
+                                  <h6><a>MBTI 추천받기</a></h6>
+                                  <p><i class="ion-android-star"></i><span>? / ?</span></p>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="slide-it">
+                        <div class="movie-item">
+                            <div class="mv-img">
+                                <img href="../static/imgs/question.png" alt="" style="width: 100%; height: 400px;">
+                            </div>
+                            
+                            <div class="title-in">
+                                <h6><a>MBTI 추천받기</a></h6>
+                                <p><i class="ion-android-star"></i><span>? / ?</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-it">
+                      <div class="movie-item">
+                          <div class="mv-img">
+                              <img href="../static/imgs/question.png" alt="" style="width: 100%; height: 400px;">
+                          </div>
+                          
+                          <div class="title-in">
+                              <h6><a>MBTI 추천받기</a></h6>
+                              <p><i class="ion-android-star"></i><span>? / ?</span></p>
+                          </div>
+                      </div>
+                    </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- 영화 페이지 설정 끝나는 부분, 건들기 x -->
+    </div>
+  </div>
+</div>
+
+
+
+<footer class="ht-footer">
+  <div class="container" style="background-color:black; width: 100%; align-items: center;">
+      <div class="flex-parent-ft" >
+
+          <div class="flex-child-ft item2" style="margin: auto; margin-top: 25px;">
+              <h4>가입한 회원</h4>
+              <ul>
+                  <li><a id="mbti-IJ">IJ : 42 </a></li>
+                  <li><a id="mbti-EJ">EJ : 39</a></li>
+                  <li><a id="mbti-IP">IP : 50</a></li>
+                  <li><a id="mbti-EP">EP : 48</a></li>
+                  <li><a id="mbti-no">아직 유형을 몰라요 : 23</a></li>
+              </ul>
+          </div>
+
+          <div class="flex-child-ft item2" style="margin: auto;">
+              <h4>인기 리뷰글</h4>
+                <ul>
+                    <li><a>리뷰 작성합니다.</a></li>
+                    <li><a>이건 어떠세요?</a></li>
+                    <li><a>저는 이게 좋더라구요</a></li>
+                    <li><a>이건 어떰??? 재밌던데</a></li>
+                </ul>
+                <!-- 테스트 이미지 로고 -->
+          </div>
+
+          <div class="flex-child-ft item2" style="margin: auto;">
+            <h4>신작영화</h4>
+            <!-- MBTi 비율 들어갈 곳 -->
+            <ul>
+              <li><a>범죄도시3</a></li>
+              <li><a>밀수</a></li>
+              <li><a>콘트리아유토피아</a></li>
+              <li><a>미션 임파서블7</a></li>
+            </ul>
+        </div>
+
+      </div>
+      <!-- 위로 가기 -->
+      <div class="backtotop">
+        <p><a href="#" id="back-to-top" style="color: white;"><i class="ion-ios-arrow-thin-up">위로</i></a></p>
+      </div>
+      <div>
+        <h6 style="text-align: center;">본 사이트는 포트폴리오용 사이트로 제작되었습니다. Project 2023.07</h6>
+        <br/>
+      </div>
+  </div>
+
+</footer>
+
+
+</body>
+<script type="text/javascript" th:inline="javascript">
+  // 현재 로그인 계정 고유번호
+          let memberNoVal = "${member.member_no}";
+          // 현재 로그인 계정 mbti
+          let memberMbtiVal = "${member.mbti_no}";
+          // 현재 페이지의 영화 고유번호
+          let movieNoVal = "${movie.movie_no}";
+
+     $(document).ready(function(){
+
+
+      function loginCheck() {
+              //console.log("loginCheck");
+             if (memberNoVal == null || memberNoVal.length == 0) {
+                alert("로그인 필요.");
+                loginStatus = 0;
+              }
+          } // loginCheck end
+
+            /*
+            // 현재 로그인 계정 고유번호
+            var memberNoVal = [[${session.member.member_no}]];
+            // 현재 로그인 계정 mbti
+            var memberMbtiVal = [[${session.member.mbti_no}]];
+            // 현재 페이지의 영화 고유번호
+            var movieNoVal = 10;
+            */
+
+            //리뷰관련
+            function getMyReview() {
+                //console.log("getMyReview");
+                $.ajax({
+                    url: "/review/"+memberNoVal+"/"+movieNoVal,
+                    type: "get",
+                    success: function(result){
+                        //console.log("getMyReview Success");
+                        //console.log(result);
+                        // 리뷰 내용이 존재할경우 리뷰 출력 요청
+                        if(result.review_content != null) {
+                            printMyReview(result);
+                        } else {
+                            return;
+                        }
+                    },
+                    error: function(e){
+                        console.log("getMyReview Error");
+                        console.log(e);
+                    }
+                }); // ajax end
+            }; // getMyReview end
+
+            getReviewList();
+            var reviews = $("#review_container");
+
+            // 리뷰 목록 요청
+            function getReviewList() {
+                //console.log("getReviewList");
+                $.ajax({
+                    url: "/review/list/"+movieNoVal,
+                    type: "get",
+                    success: function(result){
+                        //console.log("getReviewList Success");
+                        //console.log(result);
+                        printReviewList(result);
+                    },
+                    error: function(e){
+                        console.log("getReviewList Error");
+                        console.log(e);
+                    }
+                }); // ajax end
+            } // getReviewList end
+
+            // 리뷰 목록 화면에 출력
+            function printReviewList(reviewList) {
+                //console.log("printReviewtList");
+                var str = '';
+                for(var i = 0; i < reviewList.length; i++) {
+                    str += '<div>';
+                    str += '<div style="border: 1px solid;"><p class="time"><a href="/member/otherMypage?email='+reviewList[i].member_email+'">'+reviewList[i].member_nickname+'</a>';
+                    str += '<a style="float: right;">'+timeFormat(reviewList[i].review_reg)+'</a></p>';
+                    str += '<div><a>좋아요 : '+reviewList[i].review_like+'</a></div>';
+                    str += '<div><div class="star">'+reviewList[i].review_star+'</div>';
+                    str += '<p><a href="/review/'+reviewList[i].review_no+'">'+reviewList[i].review_content+'</a></p></div>';
+                    str += '<br /></div><hr>';
+                }
+                reviews.html(str);
+            } // printReviewList end
+  });
+</script>
