@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- JQuery 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+<th:block th:replace="~{/layout/base :: setContent(~{this :: content})}">
+
+    <th:block th:fragment="content">
+
+        <style>
+            textarea {
+                resize: none;
+            }
+            h1 a {
+                color: #4280bf;
+            }
+            h2 a:hover, h1 a:hover {
+                color: #dcf836;
+            }
+            h2 {
+                margin-bottom: 5px;
+            }
+            .flex-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                float: right;
+            }
+            .button-container {
+                display: flex;
+                justify-content: space-between
+            }
+            .rep-btn, .button-container i a {
+                margin-left: 10px;
+                cursor: pointer;
+            }
+            .button-container i a:hover {
+                color: #dcf836;
+            }
+            .inner-container {
+                display: inline-block;
+            }
+            .rate i {
+                color: #f5b50a;
+                font-size: 22px;
+                margin-right: 5px;
+            }
+            .social-link a {
+                cursor: pointer;
+            }
+            #modifyReplyInput, #replyInput {
+                font-family: 'Nunito', sans-serif;
+                font-size: 12px;
+                color: #abb7c4;
+                font-weight: 300;
+                text-transform: none;
+                border: 1px solid #405266;
+                border-radius: 3px;
+                height: 42px;
+                background: none;
+                margin-bottom: 20px;
+            }
+            .author-infor {
+                width: 100%;
+            }
+            .submit {
+                background-color: #dd003f;
+                padding: 0 30px;
+                height: 25px;
+                border-radius: 30px;
+                font-family: 'Dosis', sans-serif;
+                font-size: 14px;
+                color: #ffffff;
+                font-weight: bold;
+                border: none;
+                margin-right: 10px;
+            }
+            .comment-reply {
+                margin-top: 0px;
+            }
+        </style>
+
+        <div class="hero common-hero">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="hero-ct">
+                            <h1>리뷰 상세</h1>
+                            <ul class="breadcumb">
+                                <li class="active"><a th:href="@{/home}">홈</a></li>
+                                <li class="active"><span class="ion-ios-arrow-right"></span><a th:href="@{/review/list(pageNum=${pager.pageNum}, listSize=${pager.listSize}, email=${pager.email}, listCheck=${pager.listCheck}, movie_no=${pager.movie_no})}">리뷰 목록</a></li>
+                                <li><span class="ion-ios-arrow-right"></span>리뷰 상세</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-single">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-10 col-sm-12 col-xs-12">
+                        <div class="blog-detail-ct">
+                            <form th:action="@{/review/delete}" method="post" id="reviewForm" th:object="${review}">
+                            <!-- 리뷰 상세 -->
+                                <h1><a th:href="@{/movie/content(movie_no=${review.movie_no})}" th:text="${review.movie_title}">영화 제목</a></h1>
+                                <p class="flex-container">
+                                    <span class="time" th:text="${#temporals.format(review.review_reg, 'yy-MM-dd HH:mm')}">작성일</span>
+                                    <span class="time" th:text="|조회수 : ${review.review_readcount}|">조회수</span>
+                                </p>
+                                <div class="time inner-container" >
+                                    <h2 style="margin-bottom: 5px;"><a th:href="@{/member/otherMypage(email=${review.member_email})}" th:field="*{member_no}" th:text="${review.member_nickname}">작성자</a></h2>
+                                    <h5 th:text="${review.member_mbti}">작성자 성향</h5>
+                                    <hr>
+                            </div>
+                                <div class="button-container">
+                                    <p class="rate">
+                                        <i class="ion-android-star">
+                                            <span th:field="*{review_star}" th:text="${review.review_star}"></span>
+                                        </i>
+                                        <span th:text="| / 5|" style="font-size: 18px"></span>
+                                    </p>
+                                    <!-- 로그인유저 == 리뷰작성자 일 경우에만 노출 -->
+                                    <i th:if="${member_no == review.member_no}">
+                                        <a id="modifyReviewBtn" data-review_no="${review.review_no}" th:href="@{/review/modify(rno=${review.review_no},pageNum=${pager.pageNum},listSize=${pager.listSize},email=${pager.email},listCheck=${pager.listCheck})}" th:text="수정"></a>
+                                        <a id="delReviewBtn" th:onclick="return delReview()" th:text="삭제"></a>
+                                        <!-- 리뷰 삭제 처리에 필요한 값 -->
+                                        <input type="hidden" name="review_no" th:value="${review.review_no}" />
+                                        <!-- 리스트 보던 페이지로 돌아가기위한 값 -->
+                                        <input type="hidden" name="pageNum" th:value="${pager.pageNum}" />
+                                        <input type="hidden" name="listSize" th:value="${pager.listSize}" />
+                                        <input type="hidden" name="email" th:value="${pager.email}" />
+                                        <input type="hidden" name="listCheck" th:value="${pager.listCheck}" />
+                                        <input type="hidden" name="movie_no" th:value="${pager.movie_no}" />
+                                    </i>
+                                </div>
+                                <div class="flex-it flex-ct cmt-item" style="margin-top: 0; padding-top: 20px;">
+                                    <p th:field="*{review_content}" th:text="${review.review_content}">내용</p>
+                                </div>
+                            </form>
+                            <!-- 리뷰 상세 끝 -->
+
+                            <!-- 소셜버튼 -->
+                            <div class="flex-it share-tag">
+                                <div class="social-link social-btn">
+                                    <a class="like-btn"><i class="ion-ios-heart-outline" data-like_check="0" th:text="| ${review.review_like}|"></i></a>
+                                    <a th:if="${followStatus} < 1"><i class="follow-btn" data-following="${review.member_no}" th:text="|+ 팔로우 ${followingCount}|"></i></a>
+                                    <a th:if="${followStatus} == 1"><i class="follow-btn" data-following="${review.member_no}" th:text="|- 팔로우 ${followingCount}|"></i></a>
+                                </div>
+                            </div>
+
+                            <!-- 댓글 작성 폼 -->
+                            <div class="comment-form" th:if="${member_no > 0}" >
+                                <h4 th:text="|댓글 작성|"></h4>
+                                <form id="commentForm">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" th:value="${member.member_nickname}" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <textarea th:field="${reply.reply_content}" style="height: 150px" placeholder="내용"></textarea>
+                                        </div>
+                                    </div>
+                                    <input type="submit" class="submit" th:value="등록" />
+                                </form>
+                            </div>
+                            <!-- 댓글 작성 폼 끝 -->
+
+                            <!-- 댓글 목록 -->
+                            <div class="comments">
+                                <h4 th:text="|${replyCount}개의 댓글|"></h4>
+                                <!-- 댓글 -->
+                                <div class="cmt-item flex-it">
+                                    <div class="author-infor">
+                                        <div class="flex-it2">
+                                            <h6><a th:text="|댓글 작성자|"></a></h6>
+                                            <span class="time" th:text="2023-07-28"></span>
+                                        </div>
+                                        <p th:text="댓글내용"></p>
+                                        <p>
+                                            <a class="rep-btn">답글</a>
+                                            <a class="rep-btn">수정</a>
+                                            <a class="rep-btn">삭제</a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <!-- 답글 -->
+                                <div class="cmt-item flex-it reply">    <!--/* reply = margin-left: 70px; */-->
+                                    <div class="author-infor">
+                                        <div class="flex-it2">
+                                            <h6><a th:text="|답글 작성자|"></a></h6>
+                                            <span class="time" th:text="2023-07-30"></span>
+                                        </div>
+                                        <p th:text="답글내용"></p>
+                                        <p>
+                                            <a class="rep-btn">답글</a>
+                                            <a class="rep-btn">수정</a>
+                                            <a class="rep-btn">삭제</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 댓글 목록 끝 -->
+
+                            <!-- 페이지네이션 영역  -->
+                            <div class="reply_pagination">
+
+                            </div>
+                            <!-- 페이지네이션 끝 -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script th:inline="javascript">
+            function delReview() {
+                console.log("delReview");
+                document.getElementById('reviewForm').submit();
+            }
+            $(document).ready(function(){
+
+                // 리뷰 고유번호
+                let reviewNoVal = [[${review.review_no}]];
+                // 리뷰 작성자 고유번호
+                let writerNoVal = [[${review.member_no}]];
+                // 로그인 유저
+                let memberNoVal = [[${member_no}]];
+                // 로그인 계정 닉네임
+                let loginNickname = [[${loginNickname}]];
+
+                // 로그인 상태 확인 (유효성 검사)
+                let loginStatus = 1;
+                function loginCheck() {
+                    //console.log("loginCheck");
+                    //console.log("memberNoVal : " + memberNoVal);
+                    if(memberNoVal < 1) {
+                        alert("로그인 필요.");
+                        loginStatus = 0;
+                    }
+                } // loginCheck end
+
+                // 좋아요 버튼 태그
+                let likeBtn = $(".like-btn");
+                // 좋아요 상태 담아줄 변수 만들어 주기
+                let likeCheck = [[${likeVO.like_check}]];
+                let likeCount = [[${review.review_like}]];
+                printLikeBtn(likeCount, likeCheck);
+
+                // 버튼 출력
+                function printLikeBtn(likeCount, likeCheck) {
+                    console.log("print like btn");
+                    console.log("likeCheck : " + likeCheck);
+                    console.log("likeCount : " + likeCount);
+                    let str = '';
+                    if(likeCheck == 1) {
+                        str = '<i class="ion-ios-heart" data-like_check="1"> '+likeCount+'</i>';
+                    } else {
+                        str = '<i class="ion-ios-heart-outline" data-like_check="0"> '+likeCount+'</i>';
+                    }
+                    // 로그인 아이디 == 작성자 아이디 || 비로그인
+                    if(memberNoVal == writerNoVal || memberNoVal == null) {
+                        str = '<i class="ion-ios-heart-outline" id=disabled-btn > '+likeCount+'</i>';
+                    }
+                    likeBtn.html(str);
+                } // printLikeBtn end
+
+                // 좋아요 버튼 상태 출력 요청
+                function getLikeBtnStatus(likeVO) {
+                    //console.log("getLikeBtnStatus");
+                    let reviewNoVal = likeVO["review_no"];
+                    $.ajax({
+                        url: "/review/like?rno="+reviewNoVal,
+                        type: "get",
+                        success: function(result){
+                            //console.log("getLikeBtnStatus Success");
+                            //console.log(result);
+                            printLikeBtn(result.likeCount, result.list[0]["like_check"]);
+                        },
+                        error: function(e){
+                            console.log("getLikeBtnStatus Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // getLikeBtnStatus end
+
+                // 좋아요 버튼 클릭 이벤트
+                $(".social-btn a.like-btn").on("click", "i" ,function() {
+                    //console.log("likeBtn clicked");
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    }
+                    // 내 리뷰 인지 확인
+                    if(memberNoVal == writerNoVal) {
+                        alert("내가 작성한 리뷰.");
+                        return;
+                    }
+                    // 누른 버튼의 좋아요 상태 가져오기 : 0 || 1
+                    let likeCheck = $(this).data("like_check");
+                    // 필수 변수 제대로 담겼는지 확인
+                    if(memberNoVal > 0 && reviewNoVal > 0) {
+                        // 저장 요청할 데이터 객체로 준비
+                        let likeData = {
+                                review_no : reviewNoVal,
+                                member_no : memberNoVal,
+                                like_check : likeCheck
+                        };
+                        likeRequest(likeData);
+                    } // if end
+                }); // #likeBtn event end
+
+                // 좋아요 처리 요청
+                function likeRequest(likeData) {
+                    //console.log("like request");
+                    $.ajax({
+                        url: "/review/like",
+                        type: "post",
+                        data: JSON.stringify(likeData),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(result) {
+                            //console.log("likeRequest Success");
+                            //console.log(result);
+                            getLikeBtnStatus(result);
+                        },
+                        error: function(e) {
+                            console.log("likeRequest Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // likeRequest end
+
+                // 팔로우/팔로우 취소 버튼 클릭했을때 실행하는 코드
+                $(".social-btn a").on("click", "i.follow-btn", function(e) {
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    }
+                    let btn = $(this);
+                    $.ajax({
+                        url: "/follow/add",
+                        type: "post",
+                        data: JSON.stringify({
+                            member_no_follower: memberNoVal,
+                            member_no_following: writerNoVal
+                            }),
+                        contentType: "application/json; charset=utf-8",
+                        success: function(result){
+                            console.log("success");
+                            console.log(result);
+                            // FollowResultVO (follow, followerCount, followingCount)
+                            // 결과 가지고 버튼과 팔로우 한사람의 팔로우/팔로잉수 변경
+                            if(result.following) {
+                                btn.html("- 팔로우 " + result.followingCount);
+                            }else {
+                                btn.html("+ 팔로우 " + result.followingCount);
+                            }
+                        },
+                        error: function(e){
+                            console.log("error.....");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                }); // #followBtn event end
+
+
+        // 댓글 관련
+                // 댓글목록 영역 태그
+                let comments = $("div.comments");
+                // 현재페이지 1로 초기화
+                let pageNum = 1;
+                // 댓글페이지번호 영역 태그
+                let reply_pagination = $("ul.pagination");
+                getReplyList(pageNum);
+
+                getReplyList(1);
+
+                // 댓글 저장 버튼 이벤트 처리
+                $("#commentForm input.submit").click(function(e) {
+                    //console.log("newReplyBtn clicked");
+                    // 작성자가 작성한 내용 가져오기
+                    let replyContentVal = $("#reply_content").val();
+                    //console.log("replyerInput : " + memberNoVal);
+                    //console.log("replyContentInput : " + replyContentVal);
+                    // 예외 처리
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    }
+                    // 댓글 내용 기입 확인
+                    if(!replyContentVal){
+                        alert("댓글 내용이 기입되어야 합니다.");
+                        return;
+                    }
+                    // 저장 요청할 데이터 객체로 준비
+                    let newReplyData = {
+                            reply_content: replyContentVal,
+                            member_no: memberNoVal,
+                            review_no: reviewNoVal,
+                    };
+                    insertReply(newReplyData);
+                }); // newReplyBtn click event end
+
+                // 댓글 저장 요청
+                function insertReply(replyData) {
+                    //console.log("replyData : " + replyData);
+                    $.ajax({
+                        url: "/replies/new",
+                        type: "post",
+                        data: JSON.stringify(replyData),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(result){
+                            //console.log("insertReply Success");
+                            //console.log(result);
+                            $("#replyContentInput").val("");
+                            getReplyList(pageNum); // 보던페이지 다시 요청
+                        },
+                        error: function(e){
+                            console.log("insertReply Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // insertReply end
+
+                // 댓글 목록 요청
+                function getReplyList(page) {
+                    //console.log("list page : " + page);
+                    $.ajax({
+                        url: "/replies/list/"+reviewNoVal+"/"+page,
+                        type: "get",
+                        success: function(result){
+                            //console.log("getReplyList Success");
+                            //console.log(result);
+                            printList(result.list);
+                            printReplyPagination(result.replyCount);
+                        },
+                        error: function(e){
+                            console.log("getReplyList Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // getReplyList end
+
+                // 댓글목록 화면에 출력
+                function printList(list) {
+                    //console.log("print list");
+                    let replyDiv = $(".comments div");
+                    <!--/* replies.list : 댓글 테이블 가져온 List타입 객체
+                            -> replies.list[index].컬럼명 으로 값 꺼내기 */-->
+                    let str = '';
+                    for(let i = 0; i < list.length; i++) {
+                        let tabSize = list[i].reply_level * 60;
+                        if(list[i].reply_level > 0){
+                            str += '<div class="cmt-item flex-it" style="margin-left: '+tabSize+'px;">';
+                        } else {
+                            str += '<div class="cmt-item flex-it">';
+                        }
+                        str += '<div class="author-infor"><div class="flex-it2">';
+                        str += '<h6><a href="/member/otherMypage?email='+list[i].member_email+'">'+list[i].member_nickname+'</a></h6>';
+                        str += '<span class="time">'+timeFormat(list[i].reply_reg)+'</span></div>';
+                        str += '<p>'+list[i].reply_content+'</p>';
+                        str += '<p><a id="addReplyBtn" class="rep-btn" data-reply_no="'+list[i].reply_no+'" data-reply_group="'+list[i].reply_group+'" data-reply_step="'+list[i].reply_step+'" data-reply_level="'+list[i].reply_level+'">답글</a>';
+                        if(list[i].member_no == memberNoVal) {
+                            str += '<a id="modifyReplyBtn" class="rep-btn" data-reply_no="'+list[i].reply_no+'" data-reply_content="'+list[i].reply_content+'">수정</a>';
+                            str += '<a id="delReplyBtn" class="rep-btn" data-reply_no="'+list[i].reply_no+'">삭제</a>';
+                        }
+
+                        str += '</p></div></div>';
+                    }
+                    comments.html(str);
+                } // printList end
+
+                // 댓글 수정 폼 출력
+                comments.on("click", "a#modifyReplyBtn", function(e) {
+                    let replyNoVal = $(this).data("reply_no");
+                    let replyContentVal = $(this).data("reply_content");
+
+                    let str = '<div class="title-hd"><h4>댓글 수정</h4></div>';
+                    str += '<input type="hidden" value="'+memberNoVal+'" id="replyer" />'
+                    str += '<div class="input_container"><input type="text" id="modifyReplyInput" value="'+replyContentVal+'" />';
+                    str += '</div><div>';
+                    str += '<input type="button" id="modifyApplyBtn" class="submit" data-reply_no="'+replyNoVal+'" data-reply_content="'+replyContentVal+'" value="완료" />';
+                    str += '<input type="button" id="cancelModifyBtn" class="submit" value="취소" />';
+                    str += '</div></div>';
+
+                    let parentDiv = $(this).parent().parent(); // comment-li
+                    parentDiv.html(str); // 수정폼 추가
+                }); // modifyReplyBtn click event end
+
+                // 댓글 수정 취소 버튼 이벤트 input#cancelModifyBtn
+                comments.on("click", "input#cancelModifyBtn",function(e) {
+                    //console.log("cancelModifyBtn clicked");
+                    getReplyList(pageNum); // 보던 댓글 페이지 다시 요청
+                }); // cancelModifyBtn click event end
+
+                // 댓글 수정 요청
+                comments.on("click", "input#modifyApplyBtn", function(e) {
+                    //console.log("modifyApplyBtn clicked");
+                    let replyNoVal = $(this).data("reply_no");
+                    //console.log("수정댓글번호 : " + replyNoVal);
+                    let replyContentVal = $("#modifyReplyInput").val();
+                    //console.log("수정댓글내용 : " + replyContentVal);
+                    // 저장할 내용 객체로 생성
+                    let modifyReplyData = {
+                            reply_no: replyNoVal,
+                            reply_content: replyContentVal,
+                    };
+                    $.ajax({
+                        url: "/replies/" + replyNoVal,
+                        type: "put",
+                        data: JSON.stringify(modifyReplyData),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(result){
+                            //console.log("PUT Reply Success");
+                            //console.log(result);
+                            getReplyList(pageNum); // 보던 댓글 페이지 다시 요청
+                        },
+                        error: function(e){
+                            console.log("PUT Reply Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                }); // modifyApplyBtn click event end
+
+                // 댓글 삭제 요청
+                comments.on("click", "a#delReplyBtn", function(e) {
+                    //console.log("delReplyBtn clicked");
+                    let replyNoVal = $(this).data("reply_no");
+                    //console.log("삭제 replyNoVal : " + replyNoVal);
+                    $.ajax({
+                        url: "/replies/" + replyNoVal,
+                        type: "delete",
+                        success: function(result){
+                            //console.log("DELETE Reply Success");
+                            //console.log(result);
+                            getReplyList(pageNum); // 보던 댓글 페이지 다시 요청
+                        },
+                        error: function(e){
+                            console.log("DELETE Reply Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                }); // delReplyBtn click event end
+
+                // 댓글의 답글 버튼 클릭 이벤트
+                comments.on("click", "a#addReplyBtn", function(e) {
+                    //console.log("addReplyBtn clicked");
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    }
+                    let replyNoVal = $(this).data("reply_no");
+                    let replyContentVal = $(this).data("reply_content");
+                    let replyGroupVal = $(this).data("reply_group");
+                    let replyStepVal = $(this).data("reply_step");
+                    let replyLevelVal = $(this).data("reply_level");
+                    let tabSize = (replyLevelVal+1) * 60;
+
+                    // 로그인 확인 필요
+
+                    let str = '<div class="cmt-item flex-it comment-reply" style="margin-left: '+tabSize+'px;">';
+                    str += '<div class="author-infor">';
+                    str += '<div class="title-hd"><h4>답글</h4></div>';
+                    str += '<input type="hidden" id="comment_replyer" data-member_no="'+memberNoVal+'" />'
+                    str += '<div class="input_container"><input type="text" id="replyInput"/></div>';
+                    str += '<input type="submit" id="applyBtn" class="submit" value="등록" data-reply_no="'+replyNoVal+'" data-reply_group="'+replyGroupVal+'" data-reply_step="'+replyStepVal+'" data-reply_level="'+replyLevelVal+'" />';
+                    str += '<input type="button" id="cancelModifyBtn" class="submit" value="취소" /></div>';
+
+                    let parentDiv = $(this).parent().parent().parent(); // .comment-li
+                    parentDiv.after(str); // 답글폼 추가
+                }); // addReplyBtn click event end
+
+                // 답글 저장 버튼 이벤트
+                comments.on("click", "input#applyBtn",function(e) {
+                    //console.log("saveReplyBtn clicked");
+                    // 저장할 답글, 답글작성자, 답글 저장할 댓글의 고유번호, 답글 저장할 댓글의 내용
+                    let replyContentVal = $("#replyInput").val();
+                    let replyerVal = $("#comment_replyer").data("member_no");
+                    let replyNoVal = $(this).data("reply_no");
+                    let replyGroupVal = $(this).data("reply_group");
+                    let replyStepVal = $(this).data("reply_step");
+                    let replyLevelVal = $(this).data("reply_level");
+
+                    let addReplyData = {
+                            reply_content: replyContentVal,
+                            member_no: replyerVal,
+                            review_no: reviewNoVal,
+                            reply_no: replyNoVal,
+                            reply_group: replyGroupVal,
+                            reply_step: replyStepVal,
+                            reply_level: replyLevelVal
+                    };
+                    insertReply(addReplyData);
+                }); // saveReplyBtn click event end
+
+                // 댓글페이지 번호 화면에 출력
+                function printReplyPagination(replyCount) {
+                    //console.log("댓글페이지번호, replyCount : " + replyCount);
+                    // 전체 댓글수로 페이지번호 띄워줄 값들 계산
+                    let endNum = Math.ceil(pageNum / 10.0) * 10;
+                    let startNum = endNum - 9;
+                    let prev = startNum != 1;
+                    let next = false;
+                    if(endNum * 10 >= replyCount) {
+                        endNum = Math.ceil(replyCount / 10.0);
+                    }
+                    if(endNum * 10 < replyCount) {
+                        next = true;
+                    }
+                    // 페이지 번호 띄워줄 HTML
+                    let str = '';
+                    if(prev) {
+                        str += '<a href="'+(startNum-1)+'"> Prev </a>';
+                    }
+                    for(let i = startNum; i <= endNum; i++){
+                        str += '<a href="'+i+'">&nbsp; '+ i +' &nbsp;</a>';
+                    }
+                    if(next) {
+                        str += '<a href="'+(endNum+1)+'"> Next </a>';
+                    }
+                    reply_pagination.html(str)
+                } // printReplyPagination end
+
+                // 댓글 페이지번호 이벤트 처리
+                reply_pagination.on("click", "a.page-link", function(e) {
+                    e.preventDefault(); // a태그 기본기능 취소 (기본기능:href속성의 주소로 이동)
+                    let page_link_num = $(this).attr("href");
+                    //console.log("댓글 페이지 번호 클릭! page_link_num : " + page_link_num);
+                    pageNum = page_link_num; // 현재 페이지번호를 이동하는 페이지번호로 변경
+                    getReplyList(page_link_num); // 댓글 목록 다시 요청
+                });
+
+
+                // 날짜 변환 함수
+                function timeFormat(timeValue) {
+                    let dateObj = new Date(timeValue);
+                    let yy = dateObj.getFullYear();
+                    let mm = dateObj.getMonth() + 1;
+                    let dd = dateObj.getDate();
+                    let hh = dateObj.getHours();
+                    let mi = dateObj.getMinutes();
+
+                    let result = yy + "-" + (mm > 9 ? "":"0") + mm + "-" + (dd > 9 ? "":"0") + dd + " ";
+                    result += (hh > 9 ? "": "0") + hh + ":" + (mi > 9 ? "":"0") + mi;
+
+                    return result;
+                }
+            });
+        </script>
+        <!-- 스크립트 영역 -->
+
+
+    </th:block>
+
+</th:block>

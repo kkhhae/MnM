@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.persistence.FollowMapper">
+
+    <insert id="addFollow" parameterType="com.movie.domain.FollowVO">
+        INSERT INTO relation (relation_no, member_no_following, member_no_follower)
+        VALUES (relation_seq.nextval, #{member_no_following}, #{member_no_follower})
+    </insert>
+
+    <delete id="removeFollow" parameterType="com.movie.domain.FollowVO">
+        DELETE FROM relation
+        WHERE member_no_following = #{member_no_following} AND member_no_follower = #{member_no_follower}
+    </delete>
+
+
+
+   <select id="getFollowerList" resultType="com.movie.domain.MemberVO">
+        SELECT * FROM member
+        WHERE member_no IN (
+            SELECT member_no_follower
+            FROM relation
+            WHERE member_no_following = (
+                SELECT member_no
+                FROM member
+                WHERE member_no = #{member_no}
+            )
+        )
+    </select>
+
+    <select id="getFollowingList" resultType="com.movie.domain.MemberVO">
+        SELECT * FROM member
+        WHERE member_no IN (
+            SELECT member_no_following
+            FROM relation
+            WHERE member_no_follower = (
+                SELECT member_no
+                FROM member
+                WHERE member_no = #{member_no}
+            )
+        )
+    </select>
+
+
+
+
+	<select id="getFollowingStatus" resultType="int">
+		select count(*) from relation where member_no_follower=#{follower} and member_no_following=#{following}
+	</select>
+
+	<select id="getFollowerCount" resultType="int">
+		select count(*) from relation where member_no_follower=#{follower}
+	</select>
+
+	<select id="getFollowingCount" resultType="int">
+		select count(*) from relation where member_no_following=#{following}
+	</select>
+
+
+
+
+
+
+
+</mapper>

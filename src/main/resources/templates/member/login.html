@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+
+<h1> 로그인 페이지 입니다. </h1>
+
+<body>
+<!-- 로고 이미지 추가 필요 -->
+<a th:href="@{/main}">
+  <img src="../resources/imgs/M&M_Characters.jpg" height="150">
+</a>
+<h3>로그인</h3>
+<form th:action="@{/member/login}" method="post" name="inputForm" onsubmit="return inputCheck()">
+  <div>
+    <div>
+      이메일<input type="text" name="member_email" placeholder="Email" autofocus>
+    </div>
+    <div>
+      비밀번호 <input type="password" name="member_pw" placeholder="Password">
+    </div>
+    <div>
+      <input type="submit" value="로그인">
+    </div>
+  </div>
+</form>
+<button type="button" onclick="window.location='/main'">취소</button> <!-- login get방식을 호출 -->
+<div>
+  <div>
+    <a th:href="@{/member/pw_modify}">비밀번호를 잊어버리셨나요!?</a>
+  </div>
+  <div>
+    계정이 없으신가요? <a th:href="@{/member/signup}">회원가입</a>
+  </div>
+</div>
+
+</body>
+
+<script th:inline="javascript">
+	//유효성 검사
+	function inputCheck(){
+		// 폼 정보 가져오기(form태그에 작성한 name 속성으로 form모두 가져오기 HTML->JS)
+		let inputs = document.inputForm;
+
+		// boolean, 값이 있는지 없는지 -> true/false
+		// 이메일 입력란 미작성 체크
+		if(!inputs.member_email.value) {
+			alert("이메일을 입력하세요");
+			// form tag에 false값이 넘어가면 submit 작동 x
+			return false;
+		}
+		// 비밀번호 입력란 미작성 체크
+		if(!inputs.member_pw.value){
+			alert("비밀번호를 입력하세요");
+			return false;
+		}
+	}
+</script>
+
+</html>

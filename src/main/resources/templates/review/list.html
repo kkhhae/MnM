@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- JQuery 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+<th:block th:replace="~{/layout/base :: setContent(~{this :: content})}">
+
+    <th:block th:fragment="content">
+
+        <style>
+            .ion-android-star {
+                color: #f5b50a;
+                font-size: 22px;
+                margin-right: 5px;
+            }
+            a {
+                color: #abb7c4;
+            }
+            a:hover {
+                color: #dcf836;
+            }
+            .like-button span {
+                cursor: pointer;
+            }
+            .like-button *:hover {
+                color: #4280bf;
+            }
+            #content {
+                <!--/* 내용이 길면 줄바꿈 안하고 생략시키기 */-->
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                word-break:break-all;
+                width: 300px;
+                height: 24px;
+            }
+
+        </style>
+
+        <div class="hero common-hero">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="hero-ct">
+                            <h1>리뷰 목록</h1>
+                            <ul class="breadcumb">
+                                <li class="active"><a th:href="@{/home}">홈</a></li>
+                                <li><span class="ion-ios-arrow-right"></span>리뷰 목록</li>
+                                <li th:if="${pageDTO.pager.listCheck > 0}" class="active"><span class="ion-ios-arrow-right"></span><a th:href="@{/review/list}">전체 목록</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 리뷰 리스트 영역 -->
+        <div class="page-single">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <th:block th:each="review : ${list}">
+                            <div class="col-md-4 col-sm-12 col-xs-12">
+                                <div class="blog-item-style-3" style="padding-left: 20px;">
+                                    <div class="blog-it-infor">
+                                        <h3><a th:href="@{/movie/content(movie_no=${review.movie_no})}" th:text="${review.movie_title}">영화제목</a></h3>
+                                        <span>
+                                            <a id="writer" th:href="@{/member/otherMypage(email=${review.member_email})}" th:text="${review.member_nickname}">작성자</a>
+                                            <a style="float: right;" th:text="${review.member_mbti}">작성자성향</a>
+                                        </span>
+                                        <p class="rate">
+                                            <i class="ion-android-star">
+                                                <span th:text="${review.review_star}" style="color: #f5b50a;"></span>
+                                            </i>
+                                            <span th:text="|/ 5|" style="font-size: 14px; color: #abb7c4;"></span>
+                                        </p>
+                                        <p class="content-container">
+                                            <a id="content" th:href="@{/review/{review_no}(review_no=${review.review_no}, pageNum=${pageDTO.pager.pageNum},listSize=${pageDTO.pager.listSize},email=${pageDTO.pager.email},listCheck=${pageDTO.pager.listCheck},movie_no=${review.movie_no})}" th:text="${review.review_content}">내용</a>
+                                        </p>
+                                        <div class="like-and-comments">
+                                            <p class="like-button">
+                                                <!-- 좋아요 누른 리뷰 확인 -->
+                                                <!-- 좋아요 버튼 출력 영역 -->
+                                                <!-- 비로그인 상태 || 내가 작성한 리뷰 -->
+                                                <span th:if="|${member_no < 1 or member_no == review.member_no}|">
+                                                    <a class="ion-ios-heart-outline" th:text="|&nbsp; ${review.review_like}|" >버튼 비활성화</a>
+                                                </span>
+                                                <!-- 로그인 후 && !내가 작성한 리뷰 -->
+                                                <th:block th:if="|${member_no > 0 and member_no != review.member_no}|">
+                                                    <!-- 좋아요 x 상태 -->
+                                                    <span th:if="|${lmap.get(review.review_no) != 1}|">
+                                                        <i class="ion-ios-heart-outline" th:attr="data-review_no=${review.getReview_no()}" data-like_check="0" th:text="| ${review.review_like}|" > + 좋아요</i>
+                                                    </span>
+                                                    <!-- 좋아요 o 상태 -->
+                                                    <span th:if="|${lmap.get(review.review_no) == 1}|">
+                                                        <i class="ion-ios-heart" th:attr="data-review_no=${review.getReview_no()}" data-like_check="1" th:text="| ${review.review_like}|" > - 좋아요</i>
+                                                    </span>
+                                                </th:block>
+                                                <!-- 댓글  -->
+                                                <!-- map에서 key값으로 리뷰고유번호 주고 value=replyCount 꺼내기 -->
+                                                <i style="cursor: default; float: right;" th:text="|댓글 &nbsp; ${map.get(review.review_no)}|">댓글개수</i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- 페이지네이션 영역  -->
+                <ul class="pagination">
+                    <li th:if="${pageDTO.prev}">
+                        <a th:href="@{/review/list(pageNum=${pageDTO.startPage - 1},listSize=${pageDTO.pager.listSize},email=${pageDTO.pager.email},listCheck=${pageDTO.pager.listCheck}, movie_no=${pageDTO.pager.movie_no})}" th:text="Prev"></a>
+                    </li>
+                    <li th:each="pNum : ${pageDTO.pageNumList}" th:classappend="${pageDTO.pager.pageNum == pNum} ? 'active'">
+                        <a th:href="@{/review/list(pageNum=${pNum},listSize=${pageDTO.pager.listSize},email=${pageDTO.pager.email},listCheck=${pageDTO.pager.listCheck}, movie_no=${pageDTO.pager.movie_no})}" th:text="${pNum}"></a>
+                    </li>
+                    <li th:if="${pageDTO.next}">
+                        <a th:href="@{/review/list(pageNum=${pageDTO.startPage + 1},listSize=${pageDTO.pager.listSize},email=${pageDTO.pager.email},listCheck=${pageDTO.pager.listCheck}, movie_no=${pageDTO.pager.movie_no})}" th:text="Next"></a>
+                    </li>
+                </ul>
+                <!-- 페이지네이션 끝 -->
+
+            </div>
+        </div>
+        <!-- 리뷰 리스트 끝 -->
+
+
+        <!-- 스크립트 영역 -->
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                // 필요한 변수 미리 선언
+                // 전체 리뷰 개수 가져오기
+                let listTotal = [[${pageDTO.total}]];
+                // 좋아요 버튼 영역 태그
+                let likeBtn = "";
+                // 작성자 페이지의 이메일
+                let pageEmailVal = [[${pageDTO.pager.email}]];
+                // 로그인유저
+                let memberNoVal = [[${member_no}]];
+
+                // 로그인 상태 확인 (유효성 검사)
+                let loginStatus = 1;
+                function loginCheck() {
+                    //console.log("loginCheck");
+                    if(memberNoVal < 1) {
+                        alert("로그인 필요.");
+                        loginStatus = 0;
+                    }
+                } // loginCheck end
+
+                if(listTotal == 0) {
+                    alert("게시물이 없습니다.");
+                    history.go(-1);
+                }
+
+                // 좋아요 버튼 클릭 이벤트
+                $(".like-button span").on("click", "i" ,function() {
+                    console.log("likeBtn clicked");
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    }
+                    let likeCheck = $(this).data("like_check"); // 버튼의 좋아요 상태 : 0 || 1
+                    let reviewNoVal = $(this).data("review_no"); // 버튼의 리뷰고유번호
+
+                    console.log(likeCheck);
+                    console.log(reviewNoVal);
+                    console.log(memberNoVal);
+
+                    likeBtn = $(this).parent();
+                    // 필수 변수 제대로 담겼는지 확인
+                    if(memberNoVal > 0 && reviewNoVal > 0) {
+                        // 저장 요청할 데이터 객체로 준비
+                        let likeData = {
+                                review_no : reviewNoVal,
+                                member_no : memberNoVal,
+                                like_check : likeCheck
+                        };
+                        likeRequest(likeData);
+                    } else {
+                        console.log("like btn click event error");
+                    }
+                }); // #likeBtn event end
+
+                // 좋아요 처리 요청
+                function likeRequest(likeData) {
+                    console.log("like request");
+                    $.ajax({
+                        url: "/review/like",
+                        type: "post",
+                        data: JSON.stringify(likeData),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(result) {
+                            //console.log("likeRequest Success");
+                            //console.log(result);
+                            getLikeBtnStatus(result);
+                        },
+                        error: function(e) {
+                            console.log("likeRequest Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // likeRequest end
+
+                // 좋아요 버튼 상태 출력 요청
+                function getLikeBtnStatus(likeVO) {
+                    console.log("getLikeBtnStatus");
+                    let reviewNoVal = likeVO["review_no"];
+                    $.ajax({
+                        url: "/review/like?rno="+reviewNoVal,
+                        type: "get",
+                        success: function(result){
+                            //console.log("getLikeBtnStatus Success");
+                            console.log(result);
+                            printLikeBtn(result);
+                        },
+                        error: function(e){
+                            console.log("getLikeBtnStatus Error");
+                            console.log(e);
+                        }
+                    }); // ajax end
+                } // getLikeBtnStatus end
+
+                // 좋아요 버튼 출력
+                function printLikeBtn(likeObj) {
+                    console.log("print like btn");
+                    let likeCheck = likeObj.list[0]["like_check"];
+                    let reviewNoVal = likeObj.list[0]["review_no"];
+                    let likeCount = likeObj.likeCount;
+                    let str = '';
+                    if(likeCheck == 1) {
+                        str = '<i class="ion-ios-heart" data-review_no="'+reviewNoVal+'" data-like_check="1" > '+likeCount+'</i>';
+                    } else {
+                        str = '<i class="ion-ios-heart-outline" data-review_no="'+reviewNoVal+'" data-like_check="0" > '+likeCount+'</i>';
+                    }
+                    likeBtn.html(str);
+                } // printLikeBtn end
+
+                // 비활성화 좋아요 버튼 클릭 이벤트
+                $(".like-button span").on("click", "a", function(){
+                    // 로그인 상태 확인
+                    loginCheck();
+                    if(loginStatus == 0) {
+                        return;
+                    } else {
+                        alert("내가 작성한 리뷰.");
+                    }
+                });
+
+            });
+        </script>
+
+
+    </th:block>
+
+</th:block>

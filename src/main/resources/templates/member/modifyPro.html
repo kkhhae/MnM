@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+</head>
+<body>
+<div th:if="${check}">
+    <script>
+            alert("회원 정보 수정 완료!!");
+            window.location.href="/member/mypage";
+        </script>
+</div>
+<div th:if="${!check}">
+    <script>
+            alert("비밀번호가 맞지 않습니다. 다시 시도해주세요!");
+            history.go(-1);
+        </script>
+</div>
+</body>
+</html>

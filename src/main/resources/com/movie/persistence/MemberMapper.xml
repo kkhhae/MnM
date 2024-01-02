@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.persistence.MemberMapper">
+
+	<!-- 회원 정보 삽입 -->
+	<insert id="insertMember">
+      insert into 
+      member(member_no, member_pw, member_nickname, member_email, member_mbti, member_reg, member_agreed) 
+      values(member_seq.nextval, 
+      		#{member_pw},
+      		#{member_nickname}, 
+      		#{member_email}, 
+      		#{member_mbti}, 
+      		sysdate,
+      		#{member_agreed})
+      		
+   </insert>
+
+
+	<!-- 로그인 처리 : email값과 pw값이 DB에 일치하는 정보 있으면 모든 정보 MemeberVO에 담아서 컨트롤러에 전달 -->
+	<select id="check" resultType="com.movie.domain.MemberVO">
+		select * from member 
+		where member_email=#{member_email}
+		<!-- pw가 존재하면 -->
+		<if test="member_pw!=null"> 
+		 	and member_pw = #{member_pw}
+		 </if>
+	</select>
+	
+	<!-- 이메일로 회원정보 한명 가져오기 -->
+	<select id="getMember" resultType="com.movie.domain.MemberVO">
+		select Mb.*, Mt.mbti_no from member Mb 
+			join mbti Mt on Mt.mbti_name=Mb.member_mbti
+		where member_email=#{member_email}
+	</select>
+
+
+	<!-- 해당 이메일에 맞는 비밀번호 변경처리 -->
+	<update id="updatePw">
+		update member set member_pw=#{member_pw} where member_email=#{member_email}
+	</update>
+
+	<!-- 닉네임으로 회원정보 가져오기 -->
+	  <select id="getMemberByNickname" resultType="com.movie.domain.MemberVO">
+	    SELECT Mb.*, Mt.mbti_no
+	    FROM member Mb
+	    	join mbti Mt on Mt.mbti_name=Mb.member_mbti
+	    WHERE member_nickname LIKE ('%'|| #{nickname} || '%')
+	    	AND member_status NOT IN ('DELETE', 'STOP')
+	  </select>
+	  
+	 
+	
+	<!-- 아이디와 비밀번호 일치 여부 확인 -->
+	<select id="idPwCheck" resultType="com.movie.domain.MemberVO">
+	    SELECT * FROM member
+	    WHERE member_email = #{member_email} AND member_pw = #{member_pw}
+	</select>
+	
+	<!-- 회원 정보 업데이트 -->
+	<update id="updateMember">
+	    UPDATE member
+	    SET member_nickname = #{member_nickname},
+	        member_mbti = #{member_mbti}
+	    WHERE member_email = #{member_email}
+	</update>
+	
+	<!-- 회원 정보 삭제 -->
+    <delete id="deleteMember">
+    	UPDATE member
+	    SET member_status = #{member_status}
+        WHERE member_no = #{member_no}
+    </delete>
+    
+    
+    <!-- 방명록 글저장 -->
+    <insert id="insertVisit">
+  		insert into 
+  		visit(visit_no, receiver, sender, content, visit_date) 
+  		values(visit_seq.nextval, #{receiver}, #{sender}, #{content}, sysdate)
+  	</insert>
+    
+    
+    
+    <!-- 방명록 리스트 가져오기 (내용,닉네임,mbti,방명록고유번호,답글내용,확인여부)--> 
+    <select id="getVisitList" resultType="com.movie.domain.VisitVO">
+        SELECT v.content, m.member_nickname, m.member_mbti,m.member_no, v.visit_no, v.visit_checked, v.recontent
+		FROM visit v
+		JOIN member m ON v.sender = m.member_no
+		WHERE v.receiver = #{member_no}
+		ORDER BY v.visit_date DESC
+    </select>
+    
+    
+    <!-- 방명록 댓글 저장 -->
+	<insert id="insertVisitReply" >
+		update visit set recontent=#{recontent}, visit_checked='YES' where visit_no=#{visit_no}
+	</insert>
+    
+    
+    <!-- 방명록 댓글 리스트 가져오기 -->
+	<select id="getVisitReplyList" resultType="com.movie.domain.VisitVO">
+	    SELECT * FROM visit
+	    WHERE is_comment = 1 AND visit_no = #{visit_no}
+	    ORDER BY visit_date DESC
+	</select>
+    
+    <!-- 방명록 답글 삭제 -->
+	<delete id="deleteVisitReply">
+	    UPDATE visit
+	    SET recontent = NULL,
+	        visit_checked = 'NO'
+	    WHERE visit_no = #{visit_no}
+	</delete>
+    
+    <!-- 방명록 내용 수정 -->
+	<update id="updateVisitContent">
+	    UPDATE visit
+	    SET content = #{content}
+	    WHERE visit_no = #{visit_no}
+	</update>
+    
+    <!-- 방명록 글 삭제 -->
+    <delete id="deleteVisit">
+        DELETE FROM visit
+        WHERE visit_no = #{visit_no}
+    </delete>
+    
+    <!-- 이미지 업로드 -->
+    <update id="updateMemberImagePath" >
+	    UPDATE member
+	    SET member_image_path = #{imagePath}
+	    WHERE member_no = #{member_no}
+	</update>
+	
+	
+	 <!-- 고유번호로 회원정보 가져오기 -->
+	<select id="getMemberByNo" resultType="com.movie.domain.MemberVO">
+		select Mb.*, Mt.mbti_no from member Mb
+			join mbti Mt on Mt.mbti_name=Mb.member_mbti
+	 where member_no=#{member_no}
+	</select>
+	
+	
+	<!-- 해당 유저의 영화 찜 개수 -->
+    <select id="movieWantCount" resultType="int">
+    	select count(*) from want where member_no=#{member_no}
+    </select>
+    
+    <!-- 해당 유저의 리뷰 좋아요 개수 -->
+    <select id="reviewLikeCount" resultType="int">
+    	select count(*) from wholike where member_no=#{member_no}
+    </select>
+    
+    <!-- 해당 유저의 리뷰 작성 개수 -->
+    <select id="writtenReviewCount" resultType="int">
+    	select count(*) from review where member_no=#{member_no}
+    </select>
+    
+    <!-- 해당 유저의 작성 리뷰 평균 별점 -->
+    <select id="reviewStarAvg" resultType="Double">
+    	select round(avg(review_star), 1) from review where member_no=#{member_no} 
+    </select>
+	
+	
+	<!-- 모든 유저의 mbti 정보 가져오기 -->
+	<select id="getAllMemberMbtiTypes" resultType="java.lang.String">
+        SELECT member_mbti
+        FROM member
+    </select>
+
+</mapper>

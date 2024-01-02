@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.persistence.ReplyMapper">
+
+	<!-- 신규 댓글 : reply_group 에 reply_no 넣기 -->
+	<insert id="insert">
+		<selectKey keyProperty="reply_no" order="BEFORE" resultType="long">
+			select reply_seq.nextval from dual
+		</selectKey>
+		insert into reply(reply_no, review_no, member_no, reply_content, reply_reg, reply_group, reply_step, reply_level)
+		values(#{reply_no}, #{review_no}, #{member_no}, #{reply_content}, sysdate, #{reply_no}, #{reply_step}, #{reply_level})
+	</insert>
+	
+	<!-- 답글들 step 올리기 -->
+	<update id="upadateStep">
+		update reply set reply_step=reply_step+1
+		where reply_group=#{reply_group} and reply_step > #{reply_step}
+	</update>
+	
+	<!-- 댓글의 답글 저장  -->
+	<insert id="addReReply">
+		<selectKey keyProperty="reply_no" order="BEFORE" resultType="long">
+			select reply_seq.nextval from dual
+		</selectKey>
+		insert into reply(reply_no, review_no, member_no, reply_content, reply_group, reply_step, reply_level)
+		values(#{reply_no}, #{review_no}, #{member_no}, #{reply_content}, #{reply_group}, #{reply_step}, #{reply_level}) 
+	</insert>
+
+	<select id="getReply" resultType="com.movie.domain.ReplyVO">
+		select * from reply where reply_no=#{reply_no}
+	</select>
+
+	<delete id="delete">
+		delete from reply where reply_no=#{reply_no}
+	</delete>
+	
+	<!-- 리뷰 삭제 될때 댓글도 전부 삭제 -->
+	<delete id="deleteReplies">
+		delete from reply where review_no=#{review_no}
+	</delete>
+	
+	<select id="getListWithPaging" resultType="com.movie.domain.ReplyVO">
+	<![CDATA[	
+		select r, B.*, Mb.member_nickname, Mb.member_email
+		from
+			(select rownum r, A.*
+			from
+				(select *
+				from reply where review_no=#{review_no}) A
+			where rownum <= #{pager.pageNum} * #{pager.listSize}
+			order by reply_group desc, reply_step asc) B
+				join member Mb on Mb.member_no = B.member_no
+		where r > (#{pager.pageNum} - 1) * #{pager.listSize}
+		order by reply_group desc, reply_step asc
+	]]>	
+	</select>
+	
+	<!-- 해당 리뷰의 댓글 개수 -->
+	<select id="getReplyCount" resultType="int">
+		select count(*) from reply where review_no=#{review_no}
+	</select>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateReply">
+		update reply set reply_content=#{reply_content}, reply_reg=sysdate
+		where reply_no=#{reply_no}
+	</update>
+
+</mapper>

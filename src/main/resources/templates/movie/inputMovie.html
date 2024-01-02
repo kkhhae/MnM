@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <!-- Basic need -->
+  <title>inputmovie</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+<h1>영화 등록</h1>
+<form action="/movie/inputMovie" method="post">
+  <input type="submit" value="작성 완료" />
+  <input type="reset" value="리셋" />
+  <input type="button" value="취소" onclick="window.location='/movie/list'" />
+  <br/><br/>
+  <table border="1">
+    <tr>
+      <td>영화제목</td>
+      <td><input type="text" name="movie_title" /></td>
+    </tr>
+    <tr>
+      <td>개봉연도</td>
+      <td><input type="text" name="movie_date" /></td>
+    </tr>
+    <tr>
+      <td>영화장르</td>
+      <td>
+        <h3>영화 장르를 선택하세요</h3>
+        <label><input type="checkbox" name="movie_genre" value="1"> 범죄</label>
+        <label><input type="checkbox" name="movie_genre" value="2"> 가족</label>
+        <label><input type="checkbox" name="movie_genre" value="3"> 전쟁</label>
+        <label><input type="checkbox" name="movie_genre" value="4"> 공연</label>
+        <label><input type="checkbox" name="movie_genre" value="5"> 서부극</label>
+        <label><input type="checkbox" name="movie_genre" value="6"> 드라마</label>
+        <label><input type="checkbox" name="movie_genre" value="7"> 멜로/로멘스</label>
+        <label><input type="checkbox" name="movie_genre" value="8"> 액션</label>
+        <label><input type="checkbox" name="movie_genre" value="9"> 코미디</label>
+        <label><input type="checkbox" name="movie_genre" value="10"> 스릴러</label>
+        <label><input type="checkbox" name="movie_genre" value="11"> 공포</label>
+        <label><input type="checkbox" name="movie_genre" value="12"> 애니메이션</label>
+        <label><input type="checkbox" name="movie_genre" value="13"> 어드벤처</label>
+        <label><input type="checkbox" name="movie_genre" value="14"> SF</label>
+        <label><input type="checkbox" name="movie_genre" value="15"> 판타지</label>
+        <label><input type="checkbox" name="movie_genre" value="16"> 미스터리</label>
+        <label><input type="checkbox" name="movie_genre" value="17"> 다큐멘터리</label>
+        <label><input type="checkbox" name="movie_genre" value="18"> 사극</label>
+        <label><input type="checkbox" name="movie_genre" value="19"> 뮤지컬</label>
+      </td>
+    </tr>
+    <tr>
+      <td>줄거리</td>
+      <td><textarea name="movie_summary" cols="50"></textarea></td>
+    </tr>
+    <tr>
+      <td>배우</td>
+      <td><input type="text" name="movie_actor" /></td>
+    </tr>
+    <tr>
+      <td>감독</td>
+      <td><input type="text" name="movie_director" /></td>
+    </tr>
+    <tr>
+      <td>포스터 URL</td>
+      <td><input type="text" name="movie_link" id="movie_link" /></td>
+    </tr>
+  </table>
+  <h4>OTT 등록</h4>
+  <input type="text" name="movie_ott" placeholder="ott">
+  <input type="text" name="movie_ott_link" placeholder="ott링크 주소">
+  <br>
+  <input type="text" name="movie_ott" placeholder="ott">
+  <input type="text" name="movie_ott_link" placeholder="링크 주소">
+  <br>
+  <input type="text" name="movie_ott" placeholder="ott">
+  <input type="text" name="movie_ott_link" placeholder="링크 주소">
+  <br>
+  <input type="text" name="movie_ott" placeholder="ott">
+  <input type="text" name="movie_ott_link" placeholder="링크 주소">
+  <br>
+</form>
+</body>
+</html>

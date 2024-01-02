@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- JQuery 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<th:block th:replace="~{/layout/base :: setContent(~{this::content})}">
+
+    <th:block th:fragment="content">
+<body>
+<div class="hero mv-single-hero" style="background-image: url('/includes/images/uploads/hero-bg.jpg');">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12"></div>
+        </div>
+    </div>
+</div>
+<div class="page-single movie-single movie_single">
+    <div class="container">
+        <div class="row ipad-width2">
+            <div class="col-md-4 col-sm-12 col-xs-12">
+                <div class="movie-img">
+                    <a th:href="@{/movie/modify(movie_no=${movie.movie_no}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword})}">수정하기</a>
+                    <a th:href="@{/movie/list(movie_no=${movie.movie_no}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword})}">뒤로가기</a>
+                    <img th:src="${movie.movie_link}" alt="">
+                </div>
+            </div>
+
+            <div class="col-md-8 col-sm-12 col-xs-12">
+                <div class="movie-single-ct main-content">
+                    <h1 class="bd-hd" th:text="${movie.movie_title} + ' ' + ${movie.movie_date}"></h1>
+                    <div class="social-btn">
+                        <a href="#" class="parent-btn"><i class="ion-heart"></i></a>
+                    </div>
+                    <div class="movie-rate">
+                        <div class="rate">
+                            <i class="ion-android-star"></i>
+                            <p><span>3.3</span><br>
+                                <span class="rv"></span>
+                            </p>
+                        </div>
+                        <div class="rate-star">
+                            <p>생각보다 재밌네요</p>
+                        </div>
+                    </div>
+                    <div class="movie-tabs">
+                        <div class="tabs">
+                            <div class="tab-links tabs-mv">
+                                <p th:text="${movie.movie_summary}"></p>
+                            </div>
+                        </div>
+                        <!-- ott링크 첨부 -->
+                        <div th:each="movieOtt : ${movieOttList}">
+                            <p><a th:href="${movieOtt.movie_ott_link}" th:text="${movieOtt.movie_ott + ' 보러가기'}"></a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content">
+                <div id="overview" class="tab active">
+                    <div class="row">
+                        <div class="col-md-auto col-sm-12 col-xs-12">
+                            <div class="title-hd-sm">
+                                <h4>장르</h4>
+                            </div>
+                            <!-- movie cast -->
+                            <div class="mvcast-item">
+                                <div class="cast-it">
+                                    <p>장르:
+                                        <!--
+                                        <p>
+										 장르 뽑아내기, 1,2,3 -> 범죄,..,..
+                                        <c:set var="genreIds" value="${fn:split(movie.movie_genre, ',')}" />
+                                        <c:set var="genreNames" value="" />
+                                        <c:forEach var="genreId" items="${genreIds}">
+                                            <c:forEach var="genre" items="${genreList}">
+                                                <c:if test="${genre.genre_no eq genreId}">
+                                                    <c:set var="genreNames" value="${genreNames}${genre.movie_genre_name}," />
+                                                </c:if>
+                                            </c:forEach>
+                                        </c:forEach>
+                                        <%-- 쉼표 제거 --%>
+                                        <c:if test="${fn:length(genreNames) > 0}">
+                                            ${fn:substring(genreNames, 0, fn:length(genreNames) - 1)}
+                                        </c:if>
+                                    </p>
+
+                                        <th:block th:var="movieGenre" th:value="${movie.movie_genre}">
+                                            <th:block th:each="genre : ${genreList}">
+                                                <p th:if="${genre.movie_genre_no == movieGenre}">
+                                                    <p th:text="${genre.movie_genre_name}"></p>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>-->
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div id="overview" class="tab active">
+                    <div class="row">
+                        <div class="col-md-auto col-sm-12 col-xs-12">
+                            <div class="title-hd-sm">
+                                <h4>감독</h4>
+                            </div>
+                            <!-- movie cast -->
+                            <div class="mvcast-item">
+                                <div class="cast-it">
+                                    <p th:text="${movie.movie_director}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div id="overview" class="tab active">
+                    <div class="row">
+                        <div class="col-md-auto col-sm-12 col-xs-12">
+                            <div class="title-hd-sm">
+                                <h4>배우</h4>
+                            </div>
+                            <!-- movie cast -->
+                            <div class="mvcast-item">
+                                <div class="cast-it">
+                                    <p th:text="${movie.movie_actor}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <form>
+                    <div>
+                        <div id="my_review_container">
+                            <div class="tab-content">
+                                <div class="title-hd-sm">
+                                    <h4>리뷰 작성</h4>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="time">별점</p>
+                                <select id="starRate">
+                                    <option value="0" selected>0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="reviewContentInput">내용</label>
+                                <input type="text" name="reviewContent" id="reviewContentInput"/>
+                            </div>
+                        </div>
+                        <div>
+                            <div id="button_container">
+                                <button type="button" id="newReviewBtn" style="margin-top: 5px;">리뷰 등록</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tab-content">
+                <div class="title-hd-sm">
+                    <h4>인기 리뷰 리스트</h4>
+                    <a th:href="@{/review/list(movie_no=${movie.movie_no}, listCheck=2)}" class="time">리뷰 더보기 <i class="ion-ios-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="blog-it-infor" id="review_container">
+
+                <div th:each="review : ${reviewList}">
+                    <div>
+                        <div>
+                            <p class="time">
+                                <a th:href="@{/member/otherMypage(email=${review.member_email})}"
+                                   th:text="${review.member_nickname}"></a> <span th:text="${#dates.format(review.review_reg, 'yyyy-MM-dd HH:mm')}"></span>
+                            </p>
+                            <div class="no-star" th:text="'star ' + ${review.review_star}"></div>
+                        </div>
+                    </div>
+                    <p th:text="${review.review_content}"></p>
+                    <br>
+                </div>
+
+            </div>
+
+
+            <div id="moviesrelated" class="tab">
+                <div class="row">
+                    <div class="topbar-filter">
+                        <p>가장 많이 본 MBTI의 평점 높은 영화 리스트</p>
+                    </div>
+                    <div class="movie-item-style-2">
+                        <img src="https://search.pstatic.net/common?quality=75&direct=true&src=https%3A%2F%2Fmovie-phinf.pstatic.net%2F20190410_241%2F15548645825295asuI_JPEG%2Fmovie_image.jpg" alt="">
+                        <div class="mv-item-infor">
+                            <h6><a href="#">영화 <span></span></a></h6>
+                            <p class="rate"><i class="ion-android-star"></i><span></span></p>
+                            <p>감독: <a href="#"></a></p>
+                            <p>배우: <a href="#"></a></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- 영화 수정하기 -->
+
+<script type="text/javascript" th:inline="javascript">
+        // 현재 로그인 계정 고유번호
+		let memberNoVal = [[${loginMember.member_no}]];
+		// 현재 로그인 계정 mbti
+		let memberMbtiVal = [[${loginMember.mbti_no}]];
+		// 현재 페이지의 영화 고유번호
+		let movieNoVal = [[${movie.movie_no}]];
+
+
+
+
+
+    $(document).ready(function () {
+
+        // 예외 처리
+        // 로그인 상태 확인
+        let loginStatus = 1;
+
+
+        function loginCheck() {
+            //console.log("loginCheck");
+           if (memberNoVal < 1) {
+              alert("로그인 필요.");
+              loginStatus = 0;
+            }
+        } // loginCheck end
+
+        /* 리뷰 관련 */
+        // 로그인 상태일 경우
+        if (memberNoVal > 0) {
+            getMyReview();
+        }
+
+        function getMyReview() {
+            //console.log("getMyReview");
+            $.ajax({
+                url: "/review/" + memberNoVal + "/" + movieNoVal,
+                type: "get",
+                success: function (result) {
+                    //console.log("getMyReview Success");
+                    //console.log(result);
+                    // 리뷰 내용이 존재할경우 리뷰 출력 요청
+                    if (result.review_content != null) {
+                        printMyReview(result);
+                    } else {
+                        return;
+                    }
+                },
+                error: function (e) {
+                    console.log("getMyReview Error");
+                    console.log(e);
+                }
+            }); // ajax end
+        } // getMyReview end
+
+        function printMyReview(review) {
+            //console.log("printMyReview");
+            let reviewInput = $("#my_review_container");
+            let submitBtn = $("#button_container button");
+            let str = '';
+            console.log(loginStatus);
+            if (loginStatus > 0) {
+                str += '<div class="tab-content"><div class="title-hd-sm">';
+                str += '<h4>내 리뷰</h4></div></div>';
+                str += '<div style="border: 1px solid;"><p><a>' + review.member_nickname + '</a>';
+                str += '<a style="float: right;">' + timeFormat(review.review_reg) + '</a></p>';
+                str += '<div><a>' + review.review_like + '</a></div>';
+                str += '<div id="reviewInput">' + review.review_star + '<br /><br />';
+                str += '<p><a>' + review.review_content + '</a></p>';
+                str += '</div><br></div>';
+                reviewInput.html(str);
+                submitBtn.attr("id", "modifyReviewBtn");
+                submitBtn.attr("data-review_no", review.review_no);
+                submitBtn.attr("data-review_content", review.review_content);
+                submitBtn.attr("data-review_star", review.review_star);
+                submitBtn.html("리뷰 수정");
+            } else {
+                return;
+            }
+        } // printMyReview end
+
+        // 리뷰 수정 버튼 클릭 이벤트
+        $("#button_container").on("click", "button#modifyReviewBtn", function () {
+            //console.log("modifyReviewBtn clicked");
+            let myReview = $("#my_review_container");
+            let reviewNoVal = $(this).data("review_no");
+            let reviewContentVal = $(this).data("review_content");
+            let reviewStarVal = $(this).data("review_star");
+
+            let str = '<div id="my_review_container"><div class="tab-content">';
+            str += '<div class="title-hd-sm"><h4>리뷰 수정</h4></div></div>';
+            str += '<div><p class="time" >별점</p>';
+            str += '<select id="starRate"><option id="star0" value="0" >0</option>';
+            str += '<option id="star2" value="1">1</option><option id="star2" value="2">2</option>';
+            str += '<option id="star3" value="3">3</option><option id="star4" value="4">4</option>';
+            str += '<option id="star5" value="5">5</option></select></div>';
+            str += '<div><label for="reviewContentInput"><p class="time">내용</p></label>';
+            str += '<input type="text" name="reviewContent" id="reviewContentInput" value="' + reviewContentVal + '" />';
+            str += '</div></div>';
+
+            myReview.html(str);
+
+            $(this).html("수정 완료");
+            $(this).attr("id", "modifyApplyBtn");
+            let btnStr = '<button type="button" id="cancleBtn" style="margin-top: 5px;">취소</button>';
+            $(this).parent().append(btnStr);
+        }) // modifyReviewBtn click event end
+
+        // 리뷰 수정 완료 버튼 이벤트 처리
+        $("#button_container").on("click", "button#modifyApplyBtn", function () {
+            //console.log("modifyApplyBtn clicked");
+            $("#button_container button#cancleBtn").remove();
+            let reviewNoVal = $(this).data("review_no");
+            let reviewContentVal = $("#reviewContentInput").val();
+            let reviewStarVal = $("#starRate").val();
+
+            // 리뷰 내용 기입 확인
+            if (!starRate) {
+                alert("별점 필수.");
+                return;
+            }
+            if (!reviewContentVal) {
+                alert("내용 필수.");
+                return;
+            }
+            // 저장 요청할 데이터 객체로 준비
+            let modifyReviewData = {
+                review_no: reviewNoVal,
+                review_content: reviewContentVal,
+                review_star: reviewStarVal
+            };
+            $.ajax({
+                url: "/review/put/" + reviewNoVal,
+                type: "put",
+                data: JSON.stringify(modifyReviewData),
+                contentType: "application/json;charset=utf-8",
+                success: function (result) {
+                    console.log("PUT review Success");
+                    console.log(result);
+                    getReviewList();
+                    getMyReview();
+                },
+                error: function (e) {
+                    console.log("PUT review Error");
+                    console.log(e);
+                }
+            }); // ajax end
+        }); // modifyApplyBtn click event end
+
+        // 수정 취소 버튼 클릭 이벤트
+        $("#button_container").on("click", "button#cancleBtn", function () {
+            //console.log("cancleBtn clicked");
+            // 보던 리뷰 다시 요청
+            $(this).remove();
+            getReviewList();
+            getMyReview();
+        });
+
+
+        // 리뷰 저장 버튼 이벤트 처리
+        $("#button_container").on("click", "button#newReviewBtn", function () {
+            //console.log("newReviewBtn clicked");
+            // 작성자가 작성한 내용 가져오기
+            let starRate = $("#starRate").val();
+            let reviewContentVal = $("#reviewContentInput").val();
+            //console.log("starRate : " + starRate);
+            //console.log("reviewContentVal : " + reviewContentVal);
+            //console.log("wrtier : " + memberNoVal);
+            // 예외 처리
+            // 로그인 상태 확인
+            loginCheck();
+            if (loginStatus == 0) {
+                return;
+            }
+            // 리뷰 내용 기입 확인
+            if (!starRate) {
+                alert("별점 필수.");
+                return;
+            }
+            if (!reviewContentVal) {
+                alert("내용 필수.");
+                return;
+            }
+            // 저장 요청할 데이터 객체로 준비
+            let newReviewData = {
+                review_content: reviewContentVal,
+                member_no: memberNoVal,
+                review_star: starRate,
+                movie_no: movieNoVal,
+                review_mbti: memberMbtiVal
+            };
+            insertReview(newReviewData);
+        }); // newReviewBtn click event end
+
+        // 리뷰 저장 요청
+        function insertReview(reviewData) {
+            //console.log("insertReview : " + reviewData);
+            $.ajax({
+                url: "/review/new",
+                type: "post",
+                data: JSON.stringify(reviewData),
+                contentType: "application/json;charset=utf-8",
+                success: function (result) {
+                    //console.log("insertReview Success");
+                    //console.log(result);
+                    $("#starRate").val("");
+                    $("#reviewContentInput").val("");
+                    getReviewList();
+                    getMyReview();
+                },
+                error: function (e) {
+                    console.log("insertReview Error");
+                    console.log(e);
+                }
+            }); // ajax end
+        } // insertReview end
+
+        getReviewList();
+        let reviews = $("#review_container");
+
+        // 리뷰 목록 요청
+        function getReviewList() {
+            //console.log("getReviewList");
+            $.ajax({
+                url: "/review/list/" + movieNoVal,
+                type: "get",
+                success: function (result) {
+                    //console.log("getReviewList Success");
+                    //console.log(result);
+                    printReviewList(result);
+                },
+                error: function (e) {
+                    console.log("getReviewList Error");
+                    console.log(e);
+                }
+            }); // ajax end
+        } // getReviewList end
+
+        // 리뷰 목록 화면에 출력
+        function printReviewList(reviewList) {
+            //console.log("printReviewtList");
+            let str = '';
+            for (let i = 0; i < reviewList.length; i++) {
+                str += '<div>';
+                str += '<div style="border: 1px solid;"><p class="time"><a href="/member/otherMypage?email=' + reviewList[i].member_email + '">' + reviewList[i].member_nickname + '</a>';
+                str += '<a style="float: right;">' + timeFormat(reviewList[i].review_reg) + '</a></p>';
+                str += '<div><a>좋아요 : ' + reviewList[i].review_like + '</a></div>';
+                str += '<div><div class="star">' + reviewList[i].review_star + '</div>';
+                str += '<p><a href="/review/' + reviewList[i].review_no + '?listCheck=2&movie_no='+reviewList[i].movie_no+'">' + reviewList[i].review_content + '</a></p>';
+                str += '</div><br></div></div>';
+            }
+            reviews.html(str);
+        } // printReviewList end
+
+
+        function timeFormat(time) {
+            //console.log("timeFormat : " + time);
+            let now = new Date(time);
+            let month = now.getMonth() + 1;
+            let day = now.getDate();
+            let hour = now.getHours();
+            let minute = now.getMinutes();
+
+            if (month < 10) {
+                month = "0" + month;
+            }
+            if (day < 10) {
+                day = "0" + day;
+            }
+            if (hour < 10) {
+                hour = "0" + hour;
+            }
+            if (minute < 10) {
+                minute = "0" + minute;
+            }
+
+            return month + "-" + day + " " + hour + ":" + minute;
+        } // timeFormat end
+
+
+    });
+</script>
+</body>
+
+</th:block> <!-- fragment cotent -->
+
+</th:block> <!-- replace -->
+

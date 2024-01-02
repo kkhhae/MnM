@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- JQuery 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+<th:block th:replace="~{/layout/base :: setContent(~{this :: content})}">
+
+    <th:block th:fragment="content">
+
+        <style>
+            textarea {
+                resize: none;
+            }
+            .rep-btn {
+                cursor: pointer;
+            }
+            h1 a {
+                color: #4280bf;
+            }
+            a:hover {
+                color: #dcf836;
+            }
+            .flex-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                float: right;
+            }
+            .button-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+            .button-container i a {
+                margin-left: 10px;
+                cursor: pointer;
+            }
+            .inner-container {
+                display: inline-block;
+            }
+            textarea {
+                color: #abb7c4;
+                font-weight: 300;
+                text-transform: none;
+                border: 1px solid #405266;
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+                background: none;
+                margin-top: 20px;
+                resize: none;
+                height: 150px;
+            }
+            select {
+                width: 130%;
+                -webkit-appearance: none;
+                background: url(../../MovieBoot/images/uploads/drop-icon.png) no-repeat right 20px center;
+                color: #4280bf;
+            }
+            .rate span {
+                color: #dcf836;
+            }
+        </style>
+
+        <div class="hero common-hero">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="hero-ct">
+                            <h1>리뷰 수정</h1>
+                            <ul class="breadcumb">
+                                <li class="active"><a th:href="@{/home}">홈</a></li>
+                                <li class="active"><span class="ion-ios-arrow-right"></span><a th:href="@{/review/list(pageNum=${pager.pageNum}, listSize=${pager.listSize}, email=${pager.email}, listCheck=${pager.listCheck}, movie_no=${pager.movie_no})}">리뷰 목록</a></li>
+                                <li class="active"><span class="ion-ios-arrow-right"></span><a th:href="@{/review/{review_no}(review_no=${review.review_no}, pageNum=${pager.pageNum}, listSize=${pager.listSize}, email=${pager.email}, listCheck=${pager.listCheck}, movie_no=${pager.movie_no})}">리뷰 상세</a></li>
+                                <li><span class="ion-ios-arrow-right"></span>리뷰 수정</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-single">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-10 col-sm-12 col-xs-12">
+                        <div class="blog-detail-ct">
+                            <form th:action method="post" th:object="${review}" id="modifyForm">
+                            <!-- 리뷰 수정 -->
+                                <h1><a th:text="${review.movie_title}">영화 제목</a></h1>
+                                <div class="button-container">
+                                    <p class="rate">
+                                        <span th:text="별점">별점</span>
+                                        <select class="starRate" th:field="*{review_star}">
+                                            <option th:value="0" selected th:text="0"></option>
+                                            <option th:value="1" th:text="|★|"></option>
+                                            <option th:value="2" th:text="|★★|"></option>
+                                            <option th:value="3" th:text="|★★★|"></option>
+                                            <option th:value="4" th:text="|★★★★|"></option>
+                                            <option th:value="5" th:text="|★★★★★|"></option>
+                                        </select>
+                                    </p>
+                                    <i>
+                                        <a class="cancleModify" th:href="@{/review/{review_no}(review_no=${review.review_no}, pageNum=${pager.pageNum}, listSize=${pager.listSize}, email=${pager.email}, listCheck=${pager.listCheck}, movie_no=${pager.movie_no})}" th:text="취소"></a>
+                                        <a class="modifyApplyBtn" th:onclick="return applyModify()" data-review_no="${review.review_no}" th:text="완료"></a>
+                                        <a class="delReviewBtn" th:text="삭제"></a>
+                                        <!-- 리뷰 수정/삭제 처리에 필요한 값 -->
+                                        <input type="hidden" name="review_no" th:value="${review.review_no}" />
+                                        <!-- 리스트 보던 페이지로 돌아가기위한 값 -->
+                                        <input type="hidden" name="pageNum" th:value="${pager.pageNum}" />
+                                        <input type="hidden" name="listSize" th:value="${pager.listSize}" />
+                                        <input type="hidden" name="email" th:value="${pager.email}" />
+                                        <input type="hidden" name="listCheck" th:value="${pager.listCheck}" />
+                                        <input type="hidden" name="movie_no" th:value="${pager.movie_no}" />
+                                    </i>
+                                </div>
+                                <div class="flex-it flex-ct cmt-item"  style="margin-top: 0;">
+                                    <h4 th:text="내용"></h4>
+                                    <textarea th:field="*{review_content}" th:text="${review.review_content}"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <script th:inline="javascript">
+            // submit (modifyApplyBtn) 작동
+            function applyModify() {
+                document.getElementById('modifyForm').submit();
+            }
+
+            $(document).ready(function(){
+                <!--/*
+                // 비로그인 상태 라면 뒤로 돌려보내기
+                if([[${member}]] == null) {
+                    console.log("수정 폼 접근 불가");
+                    alert("로그인 필요.");
+                    history.go(-1);
+                } else {
+                    // 로그인 유저 고유번호
+                    let memberNoVal = [[${sessionScope.member_no}]];
+                    // 작성자 고유번호
+                    let writerVal = [[${review.member_no}]];
+
+                    // 유효성 검사
+                    // 권한 체크 (로그인 계정 == 작성자 계정)
+                    if(memberNoVal != writerVal) {
+                        console.log("수정 폼 접근 불가");
+                        alert("작성자 != 로그인아이디");
+                        history.go(-1);
+                    }
+                }
+                */-->
+            });
+        </script>
+        <!-- 스크립트 영역 -->
+
+
+    </th:block>
+
+</th:block>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- JQuery 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<th:block th:replace="~{/layout/base :: setContent(~{this::content})}">
+
+    <th:block th:fragment="content">
+<body>
+<div class="hero common-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="hero-ct">
+                    <h1>검색결과</h1>
+                    <ul class="breadcumb">
+                        <li class="active"><a th:href="@{/movie/list}">영화 리스트</a></li>
+                        <li> <span class="ion-ios-arrow-right" th:text="'검색어 : ' + ${pager.pager.keyword}"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="movie_no" value="${movie.movie_no}" />
+<input type="hidden" name="pageNum" th:value="${pager.pager.pageNum}" />
+<input type="hidden" name="listSize" th:value="${pager.pager.listSize}" />
+<input type="hidden" name="sel" th:value="${pager.pager.sel}" />
+<input type="hidden" name="keyword" th:value="${pager.pager.keyword}" />
+
+<div class="page-single">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+
+                <div class="flex-wrap-movielist mv-grid-fw">
+                    <div th:each="movie : ${searchList}" class="movie-item-style-2 movie-item-style-1">
+                        <img th:src="${movie.movie_link}" alt="">
+                        <div class="hvr-inner">
+                            <a th:href="@{/movie/content(movie_no=${movie.movie_no}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword}, pageNum=${pager.pager.pageNum})}">
+                                상세 페이지<i class="ion-android-arrow-dropright"></i>
+                            </a>
+                        </div>
+                        <div class="mv-item-infor">
+                            <h6><a th:text="${movie.movie_title}"></a></h6>
+                            <p class="rate"><i class="ion-android-star"></i><span>N/A</span> /5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="topbar-filter">
+                    <label>Movies / page: 12 Movies</label>
+                    <div class="pagination2">
+                        <div><a>페이지 : [[${pager.pager.pageNum}]]</a></div>
+                        <div>
+                            <a th:if="${pager.prev}"
+                               th:href="@{/movie/list(pageNum=${pager.startPage-1}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword})}">
+                                &lt; previous &nbsp;
+                            </a>
+                            <!-- 하단에 페이지번호 -->
+                            <a th:each="num : ${#numbers.sequence(pager.startPage, pager.endPage)}"
+                               th:href="@{/movie/list(pageNum=${num}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword})}">
+                                &nbsp;[[${num}]]&nbsp;
+                            </a>
+                            <a th:if="${pager.next}"
+                               th:href="@{/movie/list(pageNum=${pager.endPage+1}, listSize=${pager.pager.listSize}, sel=${pager.pager.sel}, keyword=${pager.pager.keyword})}">
+                                &nbsp; next &gt;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a onclick="window.location='/movie/inputMovie'">영화 추가하기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+    </th:block> <!-- fragment cotent -->
+
+</th:block> <!-- replace -->
+

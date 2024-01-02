@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <!-- Basic need -->
+  <meta charset="UTF-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="">
+  <link rel="profile" href="#">
+
+  <!--Google Font-->
+  <link rel="stylesheet" href='http://fonts.googleapis.com/css?family=Dosis:400,700,500|Nunito:300,400,600' />
+  <!-- Mobile specific meta -->
+  <meta name=viewport content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone-no">
+
+  <!-- CSS files -->
+  <link rel="stylesheet" th:href="@{/includes/plugins.css}">
+  <meta charset="UTF-8">
+  <title>정보 수정 페이지</title>
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #021120;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border: 2px;
+        position: relative;
+
+    }
+    h3 {
+        text-align: center;
+        margin-top: 0;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .message {
+        margin-top: 20px;
+        text-align: center;
+        font-style: italic;
+    }
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .form-actions button {
+        padding: 10px 20px;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        white-space: nowrap; /* 버튼 텍스트가 한 줄로 표시되도록 설정 */
+    }
+    .form-actions button.cancel {
+        background-color: #d32f2f;
+        margin-right: 10px;
+    }
+    .form-actions button.cancel:hover {
+        background-color: #b71c1c;
+    }
+    .form-actions button.submit {
+        background-color: #999;
+    }
+    .form-actions button.submit:hover {
+        background-color: #777;
+    }
+</style>
+</head>
+<body>
+<br>
+<br>
+<br>
+<div class="container">
+  <h3>회원 정보 수정</h3>
+  <form action="/member/modify" method="post" name="modifyForm" th:object="${member}" onsubmit="return validateForm();">
+    <div>
+      <label for="nickname">현재 닉네임 : <span th:text="${member.member_nickname}"></span></label>
+      <br/>
+      변경할 닉네임 : <input type="text" name="member_nickname"  id="member_nickname" th:field="*{member_nickname}" required placeholder="변경할 닉네임을 입력하세요">
+      <br/>
+    </div>
+    <br>
+    <div>
+      기존 비밀번호 *
+      <p> <input type = "password" name = "member_pw" placeholder="비밀번호 입력"/></p>
+      비밀번호 확인 *
+      <p> <input type = "password" name = "member_pwCh" placeholder="비밀번호 입력"/></p>
+    </div>
+    <br>
+    <div>
+      <label>현재 나의 MBTI : <span th:text="${member.member_mbti}"></span> </label>
+      <br/>
+      <input type="radio" name="member_mbti" value="intj" th:checked="${member.member_mbti == 'intj'}">INTJ
+      <input type="radio" name="member_mbti" value="intp" th:checked="${member.member_mbti == 'intp'}">INTP
+      <input type="radio" name="member_mbti" value="entj" th:checked="${member.member_mbti == 'entj'}">ENTJ
+      <input type="radio" name="member_mbti" value="entp" th:checked="${member.member_mbti == 'entp'}">ENTP
+      <input type="radio" name="member_mbti" value="infj" th:checked="${member.member_mbti == 'infj'}">INFJ
+      <input type="radio" name="member_mbti" value="infp" th:checked="${member.member_mbti == 'infp'}">INFP
+      <br/>
+      <input type="radio" name="member_mbti" value="enfj" th:checked="${member.member_mbti == 'enfj'}">ENFJ
+      <input type="radio" name="member_mbti" value="enfp" th:checked="${member.member_mbti == 'enfp'}">ENFP
+      <input type="radio" name="member_mbti" value="istj" th:checked="${member.member_mbti == 'istj'}">ISTJ
+      <input type="radio" name="member_mbti" value="isfj" th:checked="${member.member_mbti == 'isfj'}">ISFJ
+      <input type="radio" name="member_mbti" value="estj" th:checked="${member.member_mbti == 'estj'}">ESTJ
+      <input type="radio" name="member_mbti" value="esfj" th:checked="${member.member_mbti == 'esfj'}">ESFJ
+      <br/>
+      <input type="radio" name="member_mbti" value="istp" th:checked="${member.member_mbti == 'istp'}">ISTP
+      <input type="radio" name="member_mbti" value="isfp" th:checked="${member.member_mbti == 'isfp'}">ISFP
+      <input type="radio" name="member_mbti" value="estp" th:checked="${member.member_mbti == 'estp'}">ESTP
+      <input type="radio" name="member_mbti" value="esfp" th:checked="${member.member_mbti == 'esfp'}">ESFP
+      <br/>
+      <input type="radio" name="member_mbti" value="no" th:checked="${member.member_mbti == 'no'}">모름
+
+    </div>
+
+    <div>
+      <input type="submit" value="수정 완료">
+      <input type="reset" value="재작성">
+      <input type="button"  value="취소" onclick="history.go(-1)" />
+
+    </div>
+  </form>
+</div>
+
+</body>
+
+<script>
+    function validateForm() {
+        var password = document.forms["modifyForm"]["member_pw"].value;
+        var passwordConfirmation = document.forms["modifyForm"]["member_pwCh"].value;
+
+        if (password === "" || passwordConfirmation === "") {
+            alert("비밀번호와 비밀번호 확인 값을 모두 입력해주세요.");
+            return false;
+        }
+
+        if (password !== passwordConfirmation) {
+            alert("비밀번호와 비밀번호 확인 입력값이 일치하지 않습니다. 다시 시도해주세요.");
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+</html>

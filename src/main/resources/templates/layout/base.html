@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" class="no-js">
+<th:block th:fragment="setContent(content)">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="">
+  <link rel="profile" href="#">
+
+  <title>영화 웹사이트</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+  <!-- CSS files -->
+  <link rel="stylesheet" href="/includes/plugins.css" />
+  <link rel="stylesheet" href="/includes/style.css" />
+
+  <!-- Google Font -->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis:400,700,500|Nunito:300,400,600" />
+  <!-- Mobile specific meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone-no">
+
+  <style>
+        /* 여기에 CSS 스타일을 추가하세요 */
+    </style>
+</head>
+<body>
+
+<header class="ht-header">
+  <div class="container" style=" opacity: 0;">
+    <nav class="navbar navbar-default navbar-custom">
+      <!-- 브랜드와 토글 버튼 -->
+      <div class="navbar-header logo">
+        <div class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <div id="nav-icon1">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <a href="/home"><img class="logo" th:src="@{/includes/images/logo1.png}" alt="" width="119" height="58"></a>
+      </div>
+      <!-- 네비게이션 메뉴 -->
+      <div class="collapse navbar-collapse flex-parent" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav flex-child-menu menu-left">
+          <li class="hidden">
+            <a href="#page-top"></a>
+          </li>
+          <!--<li class="top-search">
+              <form th:action="@{/movie/searchList}" method="GET">
+                  <select name="sel">
+                      <option value="movie_title">영화</option>
+                      <option value="member_mbti">MBTI</option>
+                  </select>
+                  <input type="text" name="keyword" placeholder="영화 또는 MBTI를 검색하세요">
+                  <input type="submit" value="검색">
+              </form>
+          </li>-->
+        </ul>
+
+        <!-- 로그인 안한 상황 -->
+        <div th:if="${session.member == null}">
+          <ul class="nav navbar-nav flex-child-menu menu-right">
+            <li class="dropdown first">
+              <a class="btn btn-default dropdown-toggle lv1" data-toggle="dropdown" data-hover="dropdown"></a>
+            </li>
+            <!-- 검색 기능 추가 -->
+            <li class="searchLink"><a href="/member/searchList">검색</a></li>
+            <li class="loginLink" ><a href="/member/login">로그인</a></li>
+            <li class="signupLink"><a href="/member/signup">회원가입</a></li>
+          </ul>
+        </div>
+        <!-- 로그인 한 상황 -->
+        <div th:if="${session.member != null}">
+          <ul class="nav navbar-nav flex-child-menu menu-right">
+            <li class="dropdown first">
+              <a class="btn btn-default dropdown-toggle lv1" data-toggle="dropdown" data-hover="dropdown">
+              </a>
+            </li>
+            <li class="searchLink"><a href="/member/searchList">검색</a></li>
+            <li><a href="/member/logout">로그아웃</a></li>
+            <li><a href="/member/mypage">마이페이지</a></li>
+            <!-- 나중에 알람해줄 곳 -->
+            <li><img th:src="@{/includes/images/bell.png}" height="50px" width="50px" onclick="#"></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <!--  검색 팝업 창 -->
+  <div class="login-wrapper" id="search-content" style="overflow-y: scroll;">
+    <div class="login-content">
+      <a href="#" class="close">x</a>
+      <form th:action="@{/movie/searchList}" method="GET">
+        <h3>검색</h3>
+        <div class="search_container">
+          <select name="sel" style="flex: 2;">
+            <option value="movie_title">영화</option>
+            <option value="member_mbti">MBTI</option>
+            <option value="member_user">유저</option>
+          </select>
+          <input type="text" name="keyword" placeholder="영화, MBTI 또는 유저를 입력후 Enter입력" style="flex: 8;">
+          <div class="hidden">
+            <button type="submit">검색</button>
+          </div>
+        </div>
+      </form>
+      <br>
+      <br>
+      <br>
+    </div>
+  </div>
+
+  <!--  로그인 -->
+  <div class="login-wrapper" id="login-content">
+    <div class="login-content">
+      <br>
+      <br>
+      <br>
+      <a href="#" class="close">x</a>
+      <h3>로그인</h3>
+      <form th:action="@{/member/login}" method="post" name="LoginForm" onsubmit="return LoginFormCheck()">
+        <div class="row">
+          <label for="username">
+            ID(Email):
+            <input type="text" name="member_email" placeholder="Email을 입력하세요" required="required" />
+          </label>
+        </div>
+        <div class="row">
+          <label for="password">
+            Password:
+            <input type="password" name="member_pw" placeholder="비밀번호를 입력하세요"  required="required" />
+          </label>
+        </div>
+        <!--  <div class="row"> -->
+        <div class="container">
+          <nav class="navbar navbar-default navbar-custom">
+            <div class="collapse navbar-collapse flex-parent" id="bs-example-navbar-collapse-1">
+              <div class="pwmodifyLink"><a href="/member/pw_modify" class="pwmodifyLink">비밀번호 찾기</a></div>
+            </div>
+          </nav>
+        </div>
+        <div class="row">
+          <button type="submit">로그인</button>
+        </div>
+      </form>
+      <br>
+      <br>
+      <br>
+    </div>
+  </div>
+
+  <!-- 비밀번호 찾기 -->
+  <div class="login-wrapper" id="pwmodify-content" style="overflow-y: scroll;">
+    <div class="login-content">
+      <br>
+      <br>
+      <br>
+      <a href="#" class="close">x</a>
+      <h3>비밀번호 찾기</h3>
+      <form th:action="@{/member/pw_modify}" method="post" name="pwCheckForm" onsubmit="return pwCheck()">
+        <div class="row">
+          <label for="email">
+            이메일
+            <input class="member_email_pw" type="text" name="member_email" id="member_email_pw">
+            <span id="val-check-warn_pw"></span>
+          </label>
+        </div>
+        <div class="row">
+          <label for="emailCheck">
+            인증번호
+            <button type="button" id="mail_Check_Btn_pw" >인증번호 받기</button>
+            <input type="text" class="mail_Check_Input_pw" name="mail_Check_Input" placeholder="인증번호 6자리 입력" disabled="disabled" maxlength="6">
+            <!-- 인증번호 일치여부 확인 -->
+            <span id="mail-check-warn_pw"></span>
+          </label>
+        </div>
+        <div class="row">
+          <label for="newPw">
+            새 비밀번호
+            <input type="password" name="member_pw" id="member_pw_pw"  disabled="disabled">
+          </label>
+        </div>
+        <div>
+          <label>
+            <button type="submit">수정완료</button>
+          </label>
+        </div>
+      </form>
+      <button type="button" onclick="window.location='/home'">취소</button> <!-- 추후 팝업창 닫기로 변경 -->
+      <br>
+      <br>
+      <br>
+    </div>
+  </div>
+
+  <!-- 회원가입 -->
+  <div class="login-wrapper" id="signup-content" style="height: 1000px; overflow-y: scroll;">
+    <div class="login-content">
+      <a href="#" class="close">x</a>
+      <br>
+      <br>
+      <br>
+      <h3>회원가입</h3>
+      <form th:action="@{/member/signup}" method="post" name="inputForm" onsubmit="return inputCheck()">
+        <div class="row">
+          <label for="email">
+            이메일
+            <input class="val_Check_Input" type="text" name="member_email" id="member_email" placeholder="email" autofocus />
+            <button type="button" id="val_Check_Btn" >중복검사</button>
+            <span id="val-check-warn"></span>
+          </label>
+        </div>
+        <div class="row">
+          <label for="emailCheck">
+            이메일 인증번호
+            <input type="text" class="mail_Check_Input" name="mail_Check_Input" placeholder="인증번호 6자리 입력" disabled="disabled" maxlength="6">
+            <button type="button" id="mail_Check_Btn" >인증번호 받기</button>
+            <span id="mail-check-warn"></span>
+          </label>
+        </div>
+        <div class="row">
+          <label for="password">
+            Password:
+            <input type="password" name="member_pw" id="member_pw" disabled="disabled">
+          </label>
+          <label for="nickname">
+            NickName:
+            <input type="text" name="member_nickname" id="member_nickname" disabled="disabled">
+          </label>
+        </div>
+        <div class="row">
+          <div>
+            <div>MBTI</div>
+            <div>
+              <input type="radio" name="member_mbti" value="intj" disabled="disabled">INTJ
+              <input type="radio" name="member_mbti" value="intp" disabled="disabled">INTP
+              <input type="radio" name="member_mbti" value="entj" disabled="disabled">ENTJ
+              <input type="radio" name="member_mbti" value="entp" disabled="disabled">ENTP
+              <input type="radio" name="member_mbti" value="infj" disabled="disabled">INFJ
+              <input type="radio" name="member_mbti" value="infp" disabled="disabled">INFP
+              <input type="radio" name="member_mbti" value="enfj" disabled="disabled">ENFJ
+              <input type="radio" name="member_mbti" value="enfp" disabled="disabled">ENFP
+              <br/>
+              <input type="radio" name="member_mbti" value="istj" disabled="disabled">ISTJ
+              <input type="radio" name="member_mbti" value="isfj" disabled="disabled">ISFJ
+              <input type="radio" name="member_mbti" value="estj" disabled="disabled">ESTJ
+              <input type="radio" name="member_mbti" value="esfj" disabled="disabled">ESFJ
+              <input type="radio" name="member_mbti" value="istp" disabled="disabled">ISTP
+              <input type="radio" name="member_mbti" value="isfp" disabled="disabled">ISFP
+              <input type="radio" name="member_mbti" value="estp" disabled="disabled">ESTP
+              <input type="radio" name="member_mbti" value="esfp" disabled="disabled">ESFP
+              <br/>
+              <input type="radio" name="member_mbti" value="no" disabled="disabled">모름
+            </div>
+          </div>
+        </div>
+        <!-- 약관 동의 -->
+        <div class="row">
+          <label for="checkboxForm">
+            <input type="checkbox" id="checkAll" >
+            전체동의
+            <br/>
+            <input type="checkbox" name="member_agreed" value="1">
+            <!-- 약관 상세페이지 추후 ... -->
+            M&M 이용약관  <a href="" style="color: blue; font-size: 8px;">더보기</a>
+            <br/>
+            <input type="checkbox" name="member_agreed" value="1">
+            개인정보 수집 및 이용  <a href="" style="color: blue; font-size: 8px;">더보기</a>
+          </label>
+        </div>
+        <!-- 회원가입 버튼  -->
+        <div class="row">
+          <!-- 입력된 정보 가지고 form의 action 위치로 이동 : /member/signup 컨트롤러 PostMapping("signup")-->
+          <input type="submit" value="회원가입" >
+        </div>
+      </form>
+      <br>
+      <br>
+      <br>
+    </div>
+  </div>
+</header>
+
+<!-- header script -->
+<!-- 비밀번호 찾기 이멜일 중복 검사  -->
+<script th:inline="javascript">
+$(document).ready(function(){
+	// 사용자가 email 입력란에 이메일 입력하고 중복검사 버튼 클릭-> 이벤트 발생
+	//.클래스 이름
+	$(".member_email_pw").blur(function(){
+		// 사용자가 입력한 email 값 가져오기
+		// id 값
+		let email = $('#member_email_pw').val();
+		console.log("member_email value : " + email);
+		let resultMsg_pw = $("#val-check-warn_pw"); // 결과메세지 띄워줄 창
+
+		// ajax 요청해서 입력한 memeber_email을 email변수에에 담아서 controller의 mailAvail에 보내고
+		// DB에 존재하는 email인지 결과 리턴받기-> true/false
+		$.ajax({
+			url:"/member/mailAvail",
+			type: "post",
+			data: {email:email},
+			success: function(result){
+				console.log("요청 성공!");
+				console.log("result : " + result);
+				code = result;
+				if(code === "false"){
+					resultMsg_pw.html('이메일 인증을 진행해주세요!');
+					resultMsg_pw.css('color','green');
+					$('#mail_Check_Btn_pw').attr('disabled',false);
+				}else{
+					resultMsg_pw.html('존재하지 않는 이메일 입니다. 다시 확인해주세요!');
+					resultMsg_pw.css('color','red');
+				}
+			}
+		});
+	});
+	 $('#mail_Check_Btn_pw').click(function() {
+	      const eamil = $('#member_email_pw').val(); // 이메일 주소값 얻어오기!
+	      console.log('완성된 이메일 : ' + eamil); // 이메일 오는지 확인
+	      const checkInput = $('.mail_Check_Input_pw') // 인증번호 입력하는곳
+
+	      $.ajax({
+	         type : 'get',
+	         url : '/member/mailCheck?email='+eamil, // GET방식이라 Url 뒤에 email을 뭍힐수있다. MailController의 GetMapping("mailCheck")로 정보 전달
+	         success : function (data) {
+	            console.log("data : " +  data);
+	            checkInput.attr('disabled',false);
+	            code = data;
+	            alert('인증번호가 전송되었습니다.')
+	         }
+	      }); // end ajax
+	   }); // end send eamil
+	// 인증번호 비교
+	   // focuse 에서 blur로 변경 될때 결과 값 span태그에 띄워주기
+	   $('.mail_Check_Input_pw').blur(function () {
+	      const inputCode = $(this).val(); // const -> final과 비슷 상수값으로 설정
+	      const resultMsg = $('#mail-check-warn_pw'); // span태그의 id값 받아서 resultMsg 변수에 저장하고
+
+	      if(inputCode === code){
+	         resultMsg.html('인증번호가 일치합니다.'); // 결과 값에 따라서 변수에 저장되는 값 설정
+	         resultMsg.css('color','green');
+
+	         $('#member_pw_pw').attr('disabled',false); // pw 활성화
+
+	      }else{
+	         resultMsg.html('인증번호가 불일치 합니다. 다시 확인해주세요!.');
+	         resultMsg.css('color','red');
+	      }
+	   });
+
+<!-- 약관동의 체크박스 전체 선택/해체  -->
+	// 전체선택 체크박스의 선택 여부에 따라서 개별체크박스(name=member_agreed) 선택여부 결정
+	$("#checkAll").click(function(){
+		if($("#checkAll").is(":checked")){
+			$("input[name=member_agreed]").prop("checked", true);
+		}else{
+			$("input[name=member_agreed]").prop("checked", false);
+		}
+	});
+	// name속성으로 checkbox 들의 개수와 선택된 개수 비교해서 전체동의 "checked 활성/비활성"
+	$("input[name=member_agreed]").click(function() {
+		var total = $("input[name=member_agreed]").length;
+		var checked = $("input[name=member_agreed]:checked").length;
+
+		if(total != checked) $("#checkAll").prop("checked", false);
+		else $("#checkAll").prop("checked", true);
+	});
+
+<!-- 검색 버튼 관련 ajax요청 -->
+   $('#search-btn').click(function() {
+       var category = $("#search-category").val();
+       var keyword = $("#search-input").val();
+
+       $.ajax({
+           type: "post",
+           url: "/movie/top-search",
+           data: {
+              sel : category,
+              keyword : keyword
+           },
+           success: function(data) {
+               console.log("요청 성공");
+               console.log("data : " + data);
+           },
+           error: function() {
+               console.log("오류 발생");
+           }
+       });
+   });
+
+    <!-- 회원가입 유효성 검사-->
+    //유효성 검사
+   // 사용자가 email 입력란에 이메일 입력하고 중복검사 버튼 클릭-> 이벤트 발생
+   $("#val_Check_Btn").click(function(){
+      	// 사용자가 입력한 email 값 가져오기
+      	let email = $('#member_email').val();
+      	console.log("member_email value : " + email);
+      	let resultMsg = $("#val-check-warn");
+		// 입력한 값이 없을 때 경고 메시지 띄우기
+		if(email===""){
+			resultMsg.html('이메일을 입력해주세요!');
+			resultMsg.css('color','red');
+		}else if(!email.includes('@') || !email.includes('.')){
+			resultMsg.html('이메일 형식이 아닙니다! 다시 입력해주세요!');
+			resultMsg.css('color','red');
+		}else{
+		// ajax 요청해서 입력한 memeber_email을 email변수에에 담아서 controller의 mailAvail에 보내고
+		// DB에 존재하는 email인지 결과 리턴받기-> true/false
+			$.ajax({
+				url:"/member/mailAvail",
+				type: "post",
+				data: {email:email},
+				success: function(result){
+					console.log("요청 성공!");
+					console.log("result : " + result);
+					code = result;
+					if(code === "true"){
+						resultMsg.html('사용가능합니다! 인증을 진행해주세요!');
+						resultMsg.css('color','green');
+						$('#mail_Check_Btn').attr('disabled',false);
+					}else{
+						resultMsg.html('이미 존재하는 이메일 입니다.');
+						resultMsg.css('color','red');
+					}
+				}
+			});
+		}
+	});
+   $('#mail_Check_Btn').click(function() {
+      const eamil = $('#member_email').val(); // 이메일 주소값 얻어오기!
+      console.log('완성된 이메일 : ' + eamil); // 이메일 오는지 확인
+      const checkInput = $('.mail_Check_Input') // 인증번호 입력하는곳
+
+      $.ajax({
+         type : 'get',
+         url : '/member/mailCheck?email='+eamil, // GET방식이라 Url 뒤에 email을 뭍힐수있다. MailController의 GetMapping("mailCheck")로 정보 전달
+         success : function (data) {
+            console.log("data : " +  data);
+            checkInput.attr('disabled',false);
+            code = data;
+            alert('인증번호가 전송되었습니다.')
+         }
+      }); // end ajax
+   }); // end send eamil
+
+   // 인증번호 비교
+   // focuse 에서 blur로 변경 될때 결과 값 span태그에 띄워주기
+   $('.mail_Check_Input').blur(function () {
+      const inputCode = $(this).val(); // const -> final과 비슷 상수값으로 설정
+      const resultMsg = $('#mail-check-warn'); // span태그의 id값 받아서 resultMsg 변수에 저장하고
+
+      if(inputCode === code){
+         resultMsg.html('인증번호가 일치합니다.'); // 결과 값에 따라서 변수에 저장되는 값 설정
+         resultMsg.css('color','green');
+         $('#mail_Check_Btn').attr('disabled',true);
+         $('#member_email').attr('readonly',true);
+         $('#mail_Check_Input').attr('readonly', true); // 인증번호 맞을시 잠금
+
+         $('#member_pw').attr('disabled',false); // pw 활성화
+         $('#member_nickname').attr('disabled',false); // 닉네임 활성화
+         $('input:radio[name=member_mbti]').attr('disabled',false); // mbti 선택 활성화
+
+      }else{
+         resultMsg.html('인증번호가 불일치 합니다. 다시 확인해주세요!.');
+         resultMsg.css('color','red');
+      }
+   });
+	//유효성 검사
+	// 회원가입시 유효성 검사
+   function inputCheck(){
+      // 폼 정보 가져오기(form태그에 작성한 name 속성으로 form모두 가져오기 HTML->JS)
+      let inputs = document.inputForm;
+
+      // boolean, 값이 있는지 없는지 -> true/false
+      // 이메일 입력란 미작성 체크
+      if(!inputs.member_email.value) {
+         alert("이메일을 입력하세요");
+         // form tag에 false값이 넘어가면 submit 작동 x
+         return false;
+      }
+      // 인증번호 미작성 체크
+      if(!inputs.mail_Check_Input.value){
+         alert("인증을 계속 진행해주세요");
+         return false;
+      }
+      // 비밀번호 입력란 미작성 체크
+      if(!inputs.member_pw.value){
+         alert("비밀번호를 입력하세요");
+         return false;
+      }
+      // 닉네임란 미작성 체크
+      if(!inputs.member_nickname.value){
+         alert("닉네임을 입력하세요");
+         return false;
+      }
+      // MBTI란 미작성 체크
+      if(!inputs.member_mbti.value){
+         alert("MBTI를 선택해주세요");
+         return false;
+      }
+      //약관동의 미체크 (체크박스 유효성 검사 주의!!!! 다른것과 다름...)
+      if(!$("input:checked[id='checkAll']").is(":checked")){
+    	  alert("약관에 동의해주세요");
+          return false;
+      }
+	}
+
+     // 로그인시 유효성 검사
+     function LoginFormCheck(){
+   	  let inputLogin = document.LoginForm;
+
+   	  if(!inputLogin.member_email.value) {
+   	         alert("이메일을 입력하세요");
+   	         // form tag에 false값이 넘어가면 submit 작동 x
+   	         return false;
+   	  }
+	  // 비밀번호 입력란 미작성 체크
+         if(!inputLogin.member_pw.value){
+            alert("비밀번호를 입력하세요");
+            return false;
+         }
+     }
+     //name="pwCheckForm" onsubmit="return pwCheck()"
+     // 비밀번호 찾기 유효성 검사
+     function pwCheck(){
+         // 폼 정보 가져오기(form태그에 작성한 name 속성으로 form모두 가져오기 HTML->JS)
+         let inputs = document.pwCheckForm;
+
+         // boolean, 값이 있는지 없는지 -> true/false
+         // 이메일 입력란 미작성 체크
+         if(!inputs.member_email_pw.value) {
+            alert("이메일을 입력하세요");
+            // form tag에 false값이 넘어가면 submit 작동 x
+            return false;
+         }
+         // 인증번호 미작성 체크
+         if(!inputs.mail_Check_Input_pw.value){
+            alert("인증을 계속 진행해주세요");
+            return false;
+         }
+         // 비밀번호 입력란 미작성 체크
+         if(!inputs.member_pw_pw.value){
+            alert("비밀번호를 입력하세요");
+            return false;
+         }
+  	 }
+});
+</script>
+
+<!-- header 끝 -->
+
+
+
+
+
+
+
+
+
+
+
+<!-- 컨텐트 위치  -->
+<th:block th:replace="${content}"></th:block>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- footer 시작 -->
+<footer class="ht-footer" style="background-image: url('/includes/images/uploads/slider-bg2.jpg');">
+  <div class="container"  >
+    <div class="flex-parent-ft">
+      <div class="flex-child-ft item2">
+        <h4>가입한 회원 MBTI 비율</h4>
+        <!-- MBTi 비율 들어갈 곳 -->
+        <ul>
+          <li><a id="mbti-IJ">IJ : </a></li>
+          <li><a id="mbti-EJ">EJ : </a></li>
+          <li><a id="mbti-IP">IP : </a></li>
+          <li><a id="mbti-EP">EP : </a></li>
+          <li><a id="mbti-no">아직 유형을 몰라요 : </a></li>
+        </ul>
+      </div>
+
+      <div class="flex-child-ft item2">
+        <!-- 인기많은 리뷰들? 넣기 좋은 공간 -->
+        <h4>인기 리뷰글</h4>
+        <div th:each="review : ${popularReview}" th:begin="0" th:end="4">
+          <div class="slide-it">
+            <h6 th:text="${review.movie_title}" style="color:white;"></h6>
+            <h6 th:text="${review.review_content}" style="color:white;"></h6>
+            <br>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-child-ft item2">
+        <ul>
+          <li><a>프로젝트 3팀 실습물 입니다.</a></li>
+        </ul>
+        <!-- 테스트 이미지 로고 -->
+        <img alt="logo" th:src="@{/includes/images/logo1.png}" width="100px" height="100px">
+      </div>
+
+      <!-- 위로 가기 -->
+      <div class="backtotop">
+        <p><a href="#" id="back-to-top" ><i class="ion-ios-arrow-thin-up">위로</i></a></p>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<!-- footer script -->
+  <script type="text/javascript" th:inline="javascript">
+
+
+          $(document).ready(function () {
+              $.ajax({
+                  url: "/member/mbti-count",
+                  method: "GET",
+                  dataType: "json",
+                  success: function (data) {
+                      console.log(data);
+                      // 서버에서 받은 데이터를 이용하여 동적으로 footer의 내용을 갱신
+                      $("#mbti-IJ").text('I J : ' + data.IJ + '명');
+                      $("#mbti-IP").text('I P : ' + data.IP + '명');
+                      $("#mbti-EP").text('E P : ' + data.EP + '명');
+                      $("#mbti-EJ").text('E J : ' + data.EJ + '명');
+                      $("#mbti-no").text('n o : ' + data.no + '명');
+                  },
+                  error: function () {
+                      console.log("Error while fetching MBTI counts.");
+                  }
+              });
+
+              <!--/*
+              // 현재 로그인 계정 고유번호
+              var memberNoVal = [[${session.member.member_no}]];
+              // 현재 로그인 계정 mbti
+              var memberMbtiVal = [[${session.member.mbti_no}]];
+              // 현재 페이지의 영화 고유번호
+              var movieNoVal = 10;
+              */-->
+
+              //리뷰 관련
+              function getMyReview() {
+                  //console.log("getMyReview");
+                  $.ajax({
+                      url: "/review/"+memberNoVal+"/"+movieNoVal,
+                      type: "get",
+                      success: function(result){
+                          //console.log("getMyReview Success");
+                          //console.log(result);
+                          // 리뷰 내용이 존재할경우 리뷰 출력 요청
+                          if(result.review_content != null) {
+                              printMyReview(result);
+                          } else {
+                              return;
+                          }
+                      },
+                      error: function(e){
+                          console.log("getMyReview Error");
+                          console.log(e);
+                      }
+                  }); // ajax end
+              }; // getMyReview end
+
+              getReviewList();
+              var reviews = $("#review_container");
+
+              // 리뷰 목록 요청
+              function getReviewList() {
+                  //console.log("getReviewList");
+                  $.ajax({
+                      url: "/review/list/"+movieNoVal,
+                      type: "get",
+                      success: function(result){
+                          //console.log("getReviewList Success");
+                          //console.log(result);
+                          printReviewList(result);
+                      },
+                      error: function(e){
+                          console.log("getReviewList Error");
+                          console.log(e);
+                      }
+                  }); // ajax end
+              } // getReviewList end
+
+              // 리뷰 목록 화면에 출력
+              function printReviewList(reviewList) {
+                  //console.log("printReviewtList");
+                  var str = '';
+                  for(var i = 0; i < reviewList.length; i++) {
+                      str += '<div>';
+                      str += '<div style="border: 1px solid;"><p class="time"><a href="/member/otherMypage?email='+reviewList[i].member_email+'">'+reviewList[i].member_nickname+'</a>';
+                      str += '<a style="float: right;">'+timeFormat(reviewList[i].review_reg)+'</a></p>';
+                      str += '<div><a>좋아요 : '+reviewList[i].review_like+'</a></div>';
+                      str += '<div><div class="star">'+reviewList[i].review_star+'</div>';
+                      str += '<p><a href="/review/'+reviewList[i].review_no+'?listCheck=3">'+reviewList[i].review_content+'</a></p></div>';
+                      str += '<br /></div><hr>';
+                  }
+                  reviews.html(str);
+              } // printReviewList end
+          });
+    </script>
+
+
+
+<script src="/includes/js/jquery.js"></script>
+<script src="/includes/js/plugins.js"></script>
+<script src="/includes/js/plugins2.js"></script>
+<script src="/includes/js/custom.js"></script>
+
+
+</footer>
+</body>
+</th:block>
+</html>
+

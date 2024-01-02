@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>login Pro</title>
+</head>
+<body>
+<!-- alertType에 따라서 다른 스크립트가 실행되도록 분기 처리 -->
+<div>
+    <!-- 로그인 성공 시 -->
+    <div th:if="${alertType=='ACTIVE'}">
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+                alert("로그인 성공");
+                var prevPage = /*[[${prevPage}]]*/;
+                if (prevPage) {
+                    window.location = prevPage;
+                } else {
+                    window.location = '/home';
+                }
+        /*]]>*/
+        </script>
+    </div>
+    <div th:if="${alertType=='STOP'}">
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+            	alert("회원님의 계정은 현재 활동 중지 상태입니다.");
+            	history.go(-1);
+        /*]]>*/
+        </script>
+    </div>
+    <div th:if="${alertType=='DELETE'}">
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+	            alert("회원님의 계정은 탈퇴되었습니다.");
+	            history.go(-1);
+        /*]]>*/
+        </script>
+    </div>
+    <div th:if="${alertType=='INVALID'}">
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+	            alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+	            history.go(-1);
+        /*]]>*/
+        </script>
+    </div>
+</div>
+</body>
+</html>

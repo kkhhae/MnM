@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.persistence.ReviewMapper">
+
+	<!-- 리뷰 관련 -->
+	<insert id="insert">
+		<selectKey keyProperty="review_no" order="BEFORE" resultType="Long">
+			select review_seq.nextval from dual
+		</selectKey>
+		insert into review(review_no, movie_no, member_no, review_content, review_mbti)
+		values(#{review_no}, #{movie_no}, #{member_no}, #{review_content}, #{review_mbti})
+	</insert>
+	<!-- 페이징 처리된 리뷰 목록 -->
+	<select id="getList" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select r, B.*, Mv.movie_title, Mb.member_nickname, Mb.member_mbti, Mb.member_email from 
+			(select rownum r, A.* from 
+				(select * from review
+				order by review_no desc) A
+			where rownum <= (#{pageNum} * #{listSize})) B
+				join movie Mv on Mv.movie_no = B.movie_no
+					join member Mb on Mb.member_no = B.member_no
+		where r > (#{pageNum} - 1) * #{listSize}
+		order by review_no desc 
+	]]>
+	</select>
+	<!-- 전체 글 총 개수 -->
+	<select id="getReviewCount" resultType="int">
+		select count(*) from review
+	</select>
+
+	<!-- 페이징 처리된 리뷰 목록 (해당 작성자 것만) -->
+	<select id="getListAsWriter" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select r, B.*, Mv.movie_title, Mb.member_nickname, Mb.member_mbti, Mb.member_email from 
+			(select rownum r, A.* from 
+				(select * from review
+				order by review_no desc) A
+			where rownum <= (#{pager.pageNum} * #{pager.listSize}) and member_no=#{pageMemberNo}) B
+				join movie Mv on Mv.movie_no = B.movie_no
+					join member Mb on Mb.member_no = B.member_no
+		where r > (#{pager.pageNum} - 1) * #{pager.listSize}
+		order by review_no desc
+	]]>
+	</select>
+
+
+
+	<!-- 작성자의 글 총 개수 -->
+	<select id="getReviewCountAsWriter" resultType="int">
+		select count(*) from review where member_no=#{pageMemberNo}
+	</select>
+	<!-- 페이징 처리된 리뷰 목록 (해당 유저의 좋아요 누른 리뷰만) -->
+	<select id="getListOfLikes" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select r, B.*, Mb.member_nickname, Mb.member_mbti, Mb.member_email, Mv.movie_title from 
+			(select rownum r, Rv.* from 
+				(select * from wholike
+				where member_no=#{pageMemberNo} and like_check = 1
+				order by review_no desc) A
+					join review Rv on A.review_no=Rv.review_no
+			where rownum <= (#{pager.pageNum} * #{pager.listSize}) ) B
+				join member Mb on Mb.member_no = B.member_no
+					join movie Mv on Mv.movie_no = B.movie_no
+		where r > (#{pager.pageNum} - 1) * #{pager.listSize}
+		order by review_no desc
+	]]>
+	</select>
+	<!-- 작성자, 영화로 리뷰 가져오기 -->
+	<select id="getMyMoiveReview" resultType="com.movie.domain.ReviewVO">
+		select Rv.*, Mb.member_nickname, Mb.member_mbti from review Rv
+			join member Mb on Mb.member_no = Rv.member_no
+		where Rv.member_no=#{member_no} and Rv.movie_no=#{movie_no}
+	</select>
+
+	<!-- 리뷰 한개 가져오기 -->
+	<select id="getReview" resultType="com.movie.domain.ReviewVO">
+		select Rv.*, Mb.member_nickname, Mb.member_mbti, Mb.member_email, Mv.movie_title
+		from review Rv
+		join member Mb on Mb.member_no = Rv.member_no
+		join movie Mv on Mv.movie_no = Rv.movie_no
+		where review_no=#{review_no}
+	</select>
+	
+	<!-- 조회수 늘리기 -->
+	<update id="updateReadcount">
+		update review set review_readcount=review_readcount+1 where review_no=#{review_no}
+	</update>
+	
+	<!-- 수정 -->
+	<update id="update">
+		update review set review_content=#{review_content}, review_star=#{review_star}
+		where review_no=#{review_no}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="delete">
+		delete from review where review_no=#{review_no}
+	</delete>
+	
+	<!-- 현재 리뷰에 해당하는 영화 제목 가져오기 -->
+	<select id="getTitle" resultType="String">
+		select movie_title from movie where movie_no=#{movie_no}
+	</select>
+	
+	<!-- 메인 페이지에 뿌려줄 인기 리뷰 리스트 -->
+	<select id="mainPageReview" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select r, B.*, Mv.movie_title, Mb.member_nickname, Mb.member_mbti, Mb.member_email from 
+			(select rownum r, A.* from 
+				(select * from review
+				order by review_like desc) A
+			where rownum <= (#{pageNum} * #{listSize})) B
+				join movie Mv on Mv.movie_no = B.movie_no
+					join member Mb on Mb.member_no = B.member_no
+		where r > (#{pageNum} - 1) * #{listSize}
+		order by review_like desc 
+	]]>
+	</select>
+	
+	<!-- 영화 상세페이지 뿌려줄 좋아요 높은 리뷰 4개 -->
+	<select id="getPopularReviewAsMovie" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select rownum r, A.*, Mb.member_nickname, Mb.member_mbti, Mb.member_email from 
+        	(select * from review
+        	order by review_like desc) A
+        		join member Mb on Mb.member_no = A.member_no
+		where rownum <= 4 and movie_no=#{movie_no}
+	]]>
+	</select>
+	
+	<!-- 페이징 처리된 리뷰 목록 (해당 영화의 것만) -->
+	<select id="getListAsMovie" resultType="com.movie.domain.ReviewVO">
+	<![CDATA[
+		select r, B.*, Mb.member_nickname, Mb.member_mbti, Mb.member_email, Mv.movie_title from 
+			(select rownum r, A.* from 
+				(select * from review
+				order by review_no desc) A
+			where rownum <= (#{pager.pageNum} * #{pager.listSize}) and movie_no=#{movie_no}) B
+				join member Mb on Mb.member_no = B.member_no
+					join movie Mv on Mv.movie_no = B.movie_no
+		where r > (#{pager.pageNum} - 1) * #{pager.listSize}
+	]]>
+	</select>
+	
+	<!-- 영화에 해당하는 리뷰 총 개수 -->
+	<select id="getReviewCountAsMovie" resultType="int">
+		select count(*) from review where movie_no=#{movie_no}
+	</select>
+	
+	
+	<!-- 좋아요 관련 -->
+	<!-- 해당리뷰의 좋아요 +1 -->
+	<update id="plusLike">
+		update review set review_like=review_like+1 where review_no=#{review_no}
+	</update>
+	
+	<!-- 해당리뷰의 좋아요 -1 -->
+	<update id="minusLike">
+		update review set review_like=review_like-1 where review_no=#{review_no}
+	</update>
+	
+	<!-- 해당리뷰의 좋아요 누른 사람 추가 -->
+	<insert id="addLike">
+		<selectKey keyProperty="like_no" order="BEFORE" resultType="Long">
+			select wholike_seq.nextval from dual
+		</selectKey>
+		insert into wholike(like_no, review_no,  member_no, like_check)
+		values(#{like_no}, #{review_no}, #{member_no}, 1)
+	</insert>
+	
+	<!-- 좋아요 취소시 테이블에서 삭제 -->
+	<delete id="disLike">
+		delete from wholike where review_no=#{review_no} and member_no=#{member_no}
+	</delete>
+	
+	<!-- 해당 유저의 좋아요 누른 리뷰 체크 -->
+	<select id="liked" resultType="com.movie.domain.ReviewLikeVO">
+		select review_no, like_check from wholike where member_no=#{member_no}
+	</select>
+	
+	<!-- 로그인 유저가 해당 리뷰의 좋아요 눌렀는지 체크 -->
+	<select id="likeCheckForMember" resultType="com.movie.domain.ReviewLikeVO">
+		select * from wholike where review_no=#{review_no} and member_no=#{member_no}
+	</select>
+	
+	<!-- 리뷰 삭제시 좋아요 상태 전부 삭제 -->
+	<delete id="disLikeAll">
+		delete from wholike where review_no=#{review_no}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 탈퇴</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .form-actions button {
+            padding: 10px 20px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* 버튼 텍스트가 한 줄로 표시되도록 설정 */
+        }
+        .form-actions button.cancel {
+            background-color: #d32f2f;
+            margin-right: 10px;
+        }
+        .form-actions button.cancel:hover {
+            background-color: #b71c1c;
+        }
+        .form-actions button.submit {
+            background-color: #999;
+        }
+        .form-actions button.submit:hover {
+            background-color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+  <h1>회원 탈퇴창</h1>
+  <form th:action="@{/member/delete}" method="post">
+    <table>
+      <tr>
+        <td><strong>닉네임:</strong></td>
+        <td th:text="${nickname}"></td>
+      </tr>
+      <tr>
+        <td><strong>이메일:</strong></td>
+        <td th:text="${email}"></td>
+      </tr>
+      <tr>
+        <td><strong>MBTI:</strong></td>
+        <td th:text="${mbti}"></td>
+      </tr>
+      <tr>
+        <td><strong>M&M과 동행을 시작한 날짜:</strong></td>
+        <td th:text="${reg}"></td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <strong>회원 탈퇴를 하시게 되면 그동안 쌓아왔던 <span th:text="${nickname}"></span> 님의 모든 정보가 사라져요ㅜㅜ 정말 삭제하실껀가요?</strong>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <p class="message">탈퇴를 원하신다면 비밀번호 입력 후, 아래의 버튼을 눌러주세요. 다시 돌아올 날을 기다릴게요, <span th:text="${nickname}"></span> 님!</p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="form-actions">
+          <input type="password" name="member_pw" required placeholder="비밀번호 입력">
+          <button type="submit" class="submit">아쉽지만 탈퇴하기</button>
+          <button type="button" class="cancel" th:onclick="|window.location='/member/mypage'|">다시 생각해보기</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+</body>
+</html>

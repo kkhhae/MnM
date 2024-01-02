@@ -1,0 +1,297 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{/layout/base :: setContent(~{this::content})}">
+
+<th:block th:fragment="content">
+
+<body>
+
+<div class="hero hero3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+      </div>
+    </div>
+  </div>
+</div>
+<div class="page-single movie-single cebleb-single">
+  <div class="container">
+    <div class="row ipad-width">
+      <div class="col-md-4 col-sm-12 col-xs-12">
+        <div class="movie-img">
+          <div class="col-md-4 col-sm-12 col-xs-12">
+            <div class="movie-img">
+              <!-- 이미지가 등록되어 있는 경우 이미지를 보여줌. -->
+              <th:block th:if="${not #strings.isEmpty(profileImageFileName) and profileImageFileName != null}">
+                <img th:src="@{/member/images/{fileName}(fileName=${profileImageFileName})}" alt="프로필 이미지" width="150" height="150">
+                <div style="margin-top: 10px;">
+                  <a href="/member/updateImg">프로필 이미지 수정하기</a>
+                </div>
+              </th:block>
+
+              <th:block th:if="${#strings.isEmpty(profileImageFileName) or profileImageFileName == null}">
+                <a href="/member/uploadForm">
+                  프로필 이미지 업로드하기
+                </a>
+              </th:block>
+            </div>
+          </div>
+
+      <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="movie-single-ct">
+          <h1 class="bd-hd" th:text="${nickname}"></h1>
+          <p class="ceb-single">MBTI : <span th:text="${mbti}"></span></p>
+          <p><a href="/follow/follow" style="color: #8a4162;">팔로워 : <span th:text="${followingCount}"></span></a></p>
+          <p><a href="/follow/follow" style="color: #8a4162;">팔로잉 : <span th:text="${followerCount}"></span></a></p>
+          <p class="ceb-single">평균 별점: <span th:text="${starAvg}"></span> 개</p>
+          <p class="ceb-single">찜한 작품 수: <span th:text="${wantCount}"></span> 개</p>
+          <p class="ceb-single">리뷰 남긴 글 : <span th:text="${reviewCount}"></span> 개</p>
+          <p class="ceb-single">좋아요 누른 리뷰 수: <span th:text="${likeCount}"></span> 개</p>
+        </div>
+
+        <div th:if="${session.member != null}">
+          <!-- 사용자가 로그인한 경우 정보 수정 버튼 표시 -->
+          <a href="/member/modify">회원정보 수정</a> <br>
+          <!-- 유저 찾기 버튼 추가
+          <a id="findUserButton" onclick="redirectToOtherPage()">유저 검색</a> <br> -->
+        </div>
+
+        <div th:unless="${session.member != null}">
+          <!-- 다른 사람이 마이페이지에 접근한 경우 팔로우 버튼 표시 -->
+          <a id="followButton" onclick="toggleFollow()">팔로우</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content">
+  <div id="overview" class="tab active">
+    <div class="row">
+      <div class="col-md-auto col-sm-12 col-xs-12">
+        <div class="title-hd-sm">
+          <h4>작성한 리뷰 리스트</h4>
+          <a href="/review/list" class="time">다른 리뷰들 보러가기<i class="ion-ios-arrow-right"></i></a>
+        </div>
+        <!-- 작성한 리스트들 -->
+        <div th:each="review : ${loggedInUserReviews}">
+          <div class="mvcast-item">
+            <div class="cast-it">
+              <div class="cast-left cebleb-film">
+                <img src="" alt="">
+                <p>영화제목 : <span th:text="${review.movie_title}"></span></p>
+                <a th:href="@{/review/{reviewNo}(reviewNo=${review.review_no} ,pageNum=1, listSize=10, email=${session.member.member_email})}" th:text="|리뷰 내용 : ${review.review_content}|">리뷰 내용</a>
+                <p>작성자: <span th:text="${review.member_nickname}"></span></p>
+                <p>작성날짜:<span th:text="${#temporals.format(review.getReview_reg(), 'yyyy-MM-dd')}"></span></p>
+              </div>
+              <div class="title-hd-sm"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content">
+  <div id="overview" class="tab active">
+    <div class="row">
+      <div class="col-md-auto col-sm-12 col-xs-12">
+        <div class="title-hd-sm">
+          <h4>방명록</h4>
+        </div>
+        <table>
+          <thead>
+          <tr style="border-left: 1px solid #000; border-right: 1px solid #000;">
+            <th><p>작성자 닉네임</p></th>
+            <th><p>작성자 mbti</p></th>
+            <th><p>작성 내용</p></th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <div th:each="visit : ${visitList}">
+            <tr>
+              <td><p th:text="${visit.member_nickname}"></p></td>
+              <td><p th:text="${visit.member_mbti}"></p></td>
+              <td><p th:text="${visit.content}"></p></td>
+              <th>
+                <p th:if="${visit.visit_checked eq 'NO'}">
+                  <a class="reply-button">답글 남기기</a>
+                </p>
+              </th>
+            </tr>
+
+            <tr th:if="${visit.visit_checked == 'YES' }">
+              <td colspan="4">
+                <!-- 답글 입력 폼 -->
+                <div class="reply-form-container">
+                  <p>&nbsp; → : <span th:text="${visit.recontent}"></span>  <a class="reply-delete-button" th:data-visitid="${visit.visit_no}">&nbsp;답글 삭제</a></p>
+                </div>
+              </td>
+              <td colspan="4" style="border-bottom: 1px solid #000;"></td>
+            </tr>
+
+            <tr th:if="${visit.visit_checked eq 'NO'}">
+              <td colspan="4">
+                <!-- 답글 입력 폼 -->
+                <div class="reply-form-container" style="display: none;">
+                  <textarea class="reply-content"></textarea>
+                  <a class="reply-save-button" th:data-visitid="${visit.visit_no}">저장</a>&nbsp;
+                  <a class="reply-cancel-button">취소</a>
+                </div>
+              </td>
+              <td colspan="4" style="border-bottom: 1px solid #000;"></td>
+            </tr>
+
+            <!-- 수정 폼 -->
+            <tr class="edit-form" style="display: none;">
+              <td colspan="4">
+                <form action="/member/updateVisit" method="post">
+                  <textarea rows="4" cols="50" name="content" th:text="${visit.content}"></textarea>
+                  <input type="hidden" name="visit_no" th:value="${visit.visit_no}" />
+                  <input type="hidden" name="email" th:value="${param.email}" />
+                  <input type="submit" value="수정 완료" />
+                  <button type="button" class="cancel-button">취소</button>
+                </form>
+              </td>
+            </tr>
+          </div>
+          </tbody>
+        </table>
+
+        <div class="container">
+          <div>
+            <a href="javascript:history.back()">뒤로가기</a>
+          </div>
+          <div>
+            <a href="/home">메인페이지로</a>
+          </div>
+          <div>
+            <a href="/member/delete">회원탈퇴하기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    // 글쓰기 버튼 누르면 텍스트 입력창 생김
+    function showWriteForm() {
+        var writeForm = document.getElementById("writeForm");
+        writeForm.style.display = "block";
+    }
+
+    function savePost() {
+        var contentInput = document.getElementById("contentInput");
+        var content = contentInput.value;
+        // 글을 저장하는 로직 추가
+        // 저장 후에 다시 숨겨진 상태로 폼 초기화
+        contentInput.value = "";
+        var writeForm = document.getElementById("writeForm");
+        writeForm.style.display = "none";
+    }
+
+    function cancelPost() {
+        var contentInput = document.getElementById("contentInput");
+        // 폼 숨기기
+        var writeForm = document.getElementById("writeForm");
+        writeForm.style.display = "none";
+        // 입력한 내용 초기화
+        contentInput.value = "";
+    }
+
+    // 유저 찾기 버튼 클릭 시 otherpage로 이동하는 함수
+    function redirectToOtherPage() {
+        location.href = "/member/searchUser";
+    }
+
+    $(document).ready(function () {
+        // 답글 버튼 클릭 이벤트 처리
+        $(document).on('click', '.reply-button', function () {
+            const replyForm = $(this).closest('tr').next().find('.reply-form-container');
+            replyForm.slideToggle();
+        });
+
+        // 답글 저장 버튼 클릭 이벤트 처리
+        $(document).on('click', '.reply-save-button', function () {
+            const visitId = $(this).data('visitid');
+            console.log(visitId);
+            const replyContent = $(this).siblings('.reply-content').val();
+            // AJAX를 사용하여 서버에 답글 저장 요청을 보냅니다.
+            $.ajax({
+                type: 'POST',
+                url: '/member/reply',
+                data: {
+                    visit_no: visitId,
+                    recontent: replyContent
+                },
+                success: function (data) {
+                    // 성공적으로 답글이 저장되면 페이지를 새로고침하여 답글이 표시되도록 합니다.
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('답글 저장 실패: ', error);
+                },
+            });
+        });
+
+        // 취소 버튼 클릭 이벤트 처리
+        $(document).on('click', '.reply-cancel-button', function () {
+            const replyForm = $(this).parent();
+            replyForm.slideUp();
+        });
+    });
+
+    // 답글 삭제 버튼 클릭 이벤트 처리
+    $(document).ready(function () {
+        $(document).on('click', '.reply-delete-button', function () {
+            const visitId = $(this).data('visitid');
+            // AJAX를 사용하여 서버에 답글 삭제 요청을 보냅니다.
+            $.ajax({
+                type: 'POST',
+                url: '/member/deleteReply', // 답글 삭제를 처리하는 URL
+                data: {
+                    visit_no: visitId // 왼쪽: 서버에서 받아 처리할 파라미터 이름 // 오른쪽 : 클라이언트에서 선택한 답글의 고유번호
+                },
+                success: function (data) {
+                    // 성공적으로 답글이 삭제되면 페이지를 새로고침하여 변경 사항이 표시되도록 합니다.
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('답글 삭제 실패: ', error);
+                },
+            });
+        });
+    });
+
+    // 서버에서 영화 찜한 작품 수를 가져와서 페이지에 업데이트하는 함수
+    function updateBookmarkCount() {
+        $.ajax({
+            url: "/member/getBookmarkCount", // 실제 엔드포인트에 맞게 수정해야 합니다.
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                // 서버에서 받은 찜한 작품 수를 업데이트합니다.
+                $(".bookmark-count").text(response.bookmarkCount);
+            },
+            error: function (error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    // 페이지 로딩 시 찜한 작품 수를 업데이트합니다.
+    $(document).ready(function () {
+        updateBookmarkCount();
+    });
+
+</script>
+
+
+</th:block> <!-- fragment cotent -->
+
+</th:block> <!-- replace -->

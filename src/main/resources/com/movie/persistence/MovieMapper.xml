@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.movie.persistence.MovieMapper">
+	
+	<!-- 영화 전체 가져오기 , 미사용
+	<select id="getMovie" resultType="com.movie.domain.MovieVO">
+		select * from movie
+	</select>-->
+	
+	<!-- 영화 검색기능 -->
+	<select id="searchByMovieTitle" resultType="com.movie.domain.MovieVO">
+		select * from movie where movie_title like '%' || #{keyword} || '%'
+	</select>	
+	
+	<select id="searchByMBTIName" resultType="com.movie.domain.MovieVO">
+		select m.* from movie m
+		join mbti b on instr(',' || b.movie_genre || ',', ',' || m.movie_genre || ',') > 0
+		where b.mbti_name =  #{keyword} 
+	</select>
+	
+	<!-- 영화 하나 가져오기 -->
+	<select id="getOneMovie" resultType="com.movie.domain.MovieVO">
+		select * from movie where movie_no=#{movie_no}
+	</select>
+	
+	<!-- 영화 추가하기 -->
+	<insert id="addMovie">
+		insert into movie(movie_no,movie_title,movie_date,movie_genre,movie_summary,movie_actor,movie_director,movie_link,movie_ott,movie_ott_link) 
+		values((select MAX(movie_no)+1 from movie),#{movie_title},#{movie_date},#{movie_genre},#{movie_summary},#{movie_actor},#{movie_director},#{movie_link},#{movie_ott},#{movie_ott_link})
+	</insert>
+	
+	<!-- 영화 수정 -->
+	<update id="updateMovie">
+		update movie SET movie_title=#{movie_title},movie_date=#{movie_date},movie_genre=#{movie_genre},movie_summary=#{movie_summary},
+						 movie_actor=#{movie_actor},movie_director=#{movie_director},movie_link=#{movie_link},movie_ott=#{movie_ott},movie_ott_link=#{movie_ott_link}
+		where movie_no=#{movie_no}
+	</update>
+	
+	<!-- 영화 no 가져오기 -->
+	<select id="getMovieNo" >
+		select movie_no from movie where movie_title=#{title}
+	</select>
+
+	<!-- 영화 삭제 -->
+	<delete id="deleteMovie">
+		DELETE FROM movie WHERE movie_no=#{movie_no}
+	</delete>
+	
+	<!-- 검색기능 사용할 때(sel) 키워드 복붙해주기 -->
+	<sql id="selWord">
+		<trim prefix="where" prefixOverrides="or"> 
+	    	<foreach item="sel" collection="selArr">
+	    		<trim prefix="or">
+	    			<choose>
+	    				<when test="sel=='title'.toString()">
+	    					movie_title like '%' || #{keyword} || '%'
+	    				</when>
+	    				<when test="sel=='mbti'.toString()">
+	    					movie_mbti like '%' || #{keyword} || '%'
+	    				</when>
+	    			
+	    			</choose>
+	    		</trim>
+	    	</foreach>
+	    </trim>  
+	</sql>
+	
+
+	<!-- 영화 가져오기+ 검색도 가능 -->
+	<select id="getMovies" resultType="com.movie.domain.MovieVO">
+		<![CDATA[
+		select r, B.* from
+	    	(select rownum r, A.* from
+	        	(select * from movie  ]]>
+	  	<include refid="selWord"></include>
+	    <![CDATA[   	
+	        	order by movie_no desc) A 
+	        where rownum <= (#{pageNum} * #{listSize})) B    
+	    where r > (#{pageNum} - 1) * #{listSize}
+	    ]]>
+	</select>
+	
+	<!-- 최신영화 가져오기 -->
+	<select id="getRecentMovies" resultType="com.movie.domain.MovieVO">
+		<![CDATA[
+		select r, B.* from
+	    	(select rownum r, A.* from
+	        	(select * from movie  ]]>
+	  	<include refid="selWord"></include>
+	    <![CDATA[   	
+	        	order by movie_date desc) A 
+	        where rownum <= (#{pageNum} * #{listSize})) B    
+	    where r > (#{pageNum} - 1) * #{listSize}
+	    ]]>
+	</select>
+
+	<!-- 리스트에 있는 전체 영화 갯수 조회하기 -->
+	<select id="getMovieCount" resultType="int">
+			select count(*) from movie
+			<include refid="selWord"></include>
+	</select>
+
+
+	<!-- GenreVO에 접속해서 movie_genre에 맞게 장르 가져오기 -->
+	<resultMap id="genreResultMap" type="com.movie.domain.GenreVO">
+	    <!-- 필드와 컬럼 매핑 정의 -->
+	    <id property="genre_no" column="genre_no" />
+	    <result property="movie_genre_name" column="movie_genre_name" />
+	    <!-- 추가 필드와 컬럼 매핑 정의 -->
+	</resultMap>
+
+	<!-- getAllGenres 장르가져오기 쿼리 -->
+	<select id="getAllGenres" resultMap="genreResultMap">
+	    SELECT *
+	    FROM genre
+	</select>
+
+	<!-- 영화 리뷰 가져오기 -->
+	<select id="getReviewByMovieNo" resultType="com.movie.domain.ReviewVO">
+	    SELECT * FROM review WHERE movie_no = #{movie_no}
+	</select>
+
+	<!-- 영화 ott 가져오기 -->
+    <select id="searchOttLink" resultType="com.movie.domain.MovieVO">
+        SELECT movie_ott_link
+        FROM movie
+        WHERE movie_ott = #{movie_ott}
+   		AND movie_ott_link = #{movie_ott_link}
+    </select>
+    
+    
+    
+    
+    <!-- 영화 찜하기-->
+    <resultMap type="com.movie.domain.MovieWantVO" id="likeMap">
+	    <result property="member_no" column="member_no"/>
+	    <result property="movie_no" column="movie_no"/>
+	</resultMap>
+	<!-- 찜하기 -->
+	<insert id="insertWant" parameterType="com.movie.domain.MovieWantVO">
+		insert into moviewant ( member_no , movie_no ) value ( #{member_no} , #{movie_no})
+	</insert>
+	<!-- 찜 목록 확인 -->
+	<select id="getMovieWantByMember" resultMap="likeMap" resultType="com.movie.domain.MovieWantVO">
+		select * from moviewant where member_no = #{member_no}
+	</select>
+	<!-- 찜 목록 1개 삭제 -->
+	<delete id="deleteWant">
+		delete from moviewant where member_no = #{member_no} and movie_no = #{movie_no}
+	</delete>
+ 	<!-- 찜한건지 조회 -->
+ 	<select id="getByMovieWithMember" resultMap="likeMap" resultType="com.movie.domain.MovieWantVO">
+	    select * from moviewant where movie_no = #{want.movie_no} and member_no = #{want.member_no}
+	</select>
+    
+    
+    
+</mapper>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <!-- Basic need -->
+  <meta charset="UTF-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="">
+  <link rel="profile" href="#">
+
+  <!--Google Font-->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis:400,700,500|Nunito:300,400,600" />
+
+  <!-- Mobile specific meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone-no">
+
+  <!-- CSS files -->
+  <link th:href="@{/includes/plugins.css}" rel="stylesheet" >
+  <title>정보 수정 페이지</title>
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #021120;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: 2px;
+            position: relative;
+
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .form-actions button {
+            padding: 10px 20px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* 버튼 텍스트가 한 줄로 표시되도록 설정 */
+        }
+        .form-actions button.cancel {
+            background-color: #d32f2f;
+            margin-right: 10px;
+        }
+        .form-actions button.cancel:hover {
+            background-color: #b71c1c;
+        }
+        .form-actions button.submit {
+            background-color: #999;
+        }
+        .form-actions button.submit:hover {
+            background-color: #777;
+        }
+    </style>
+</head>
+<body>
+<br>
+<br>
+<br>
+<form action="/movie/modify" method="post">
+  <input type="hidden" name="movie_no" th:value="${movie_no}" />
+  <input type="hidden" name="pageNum" th:value="${pager.pager.pageNum}" />
+  <input type="hidden" name="listSize" th:value="${pager.pager.listSize}" />
+  <input type="hidden" name="sel" th:value="${pager.pager.sel}" />
+  <input type="hidden" name="keyword" th:value="${pager.pager.keyword}" />
+
+  <br/><br/>
+  <table border="1">
+    <!-- 기존 뷰값 유지하기 -->
+    <tr>
+      <td>포스터 URL<input type="hidden" name="movie_no" th:value="${movie_no}" /></td>
+      <td><img alt="" th:src="${movie.movie_link}" height="300px" width="300px" />
+        <br/>
+        <input type="text" name="movie_link" th:value="${movie.movie_link}" />
+      </td>
+    </tr>
+    <tr>
+      <td>영화제목</td>
+      <td><input type="text" th:value="${movie.movie_title}" name="movie_title" /></td>
+    </tr>
+    <tr>
+      <td>개봉연도</td>
+      <td><input type="text" th:value="${movie.movie_date}" name="movie_date" /></td>
+    </tr>
+    <tr>
+      <td>영화장르 : <br>
+        <!-- 장르 입력한 번호에 맞게 해당 장르명 출력 -->
+        <th:block th:with="genreIds=${#strings.arraySplit(movie.movie_genre, ',')}">
+          <th:block th:with="genreNames=''" />
+          <th:block th:each="genreId : ${genreIds}">
+            <th:block th:each="genre : ${genreList}">
+              <th:block th:if="${genre.genre_no == genreId}">
+                <th:block th:with="genreNames=${genreNames + genre.movie_genre_name + ','}" />
+              </th:block>
+            </th:block>
+          </th:block>
+          <!-- 쉼표 제거 -->
+          <th:block th:if="${#strings.length(genreNames) > 0}" th:text="${#strings.substring(genreNames, 0, #strings.length(genreNames) - 1)}"></th:block>
+        </th:block>
+      </td>
+      <td>
+        <h3>영화 장르를 선택하세요</h3>
+        <label><input type="checkbox" name="movie_genre" value="1"> 범죄</label>
+        <label><input type="checkbox" name="movie_genre" value="2"> 가족</label>
+        <label><input type="checkbox" name="movie_genre" value="3"> 전쟁</label>
+        <label><input type="checkbox" name="movie_genre" value="4"> 공연</label>
+        <label><input type="checkbox" name="movie_genre" value="5"> 서부극</label>
+        <label><input type="checkbox" name="movie_genre" value="6"> 드라마</label>
+        <label><input type="checkbox" name="movie_genre" value="7"> 멜로/로멘스</label>
+        <label><input type="checkbox" name="movie_genre" value="8"> 액션</label>
+        <label><input type="checkbox" name="movie_genre" value="9"> 코미디</label>
+        <label><input type="checkbox" name="movie_genre" value="10"> 스릴러</label>
+        <label><input type="checkbox" name="movie_genre" value="11"> 공포</label>
+        <label><input type="checkbox" name="movie_genre" value="12"> 애니메이션</label>
+        <label><input type="checkbox" name="movie_genre" value="13"> 어드벤처</label>
+        <label><input type="checkbox" name="movie_genre" value="14"> SF</label>
+        <label><input type="checkbox" name="movie_genre" value="15"> 판타지</label>
+        <label><input type="checkbox" name="movie_genre" value="16"> 미스터리</label>
+        <label><input type="checkbox" name="movie_genre" value="17"> 다큐멘터리</label>
+        <label><input type="checkbox" name="movie_genre" value="18"> 사극</label>
+        <label><input type="checkbox" name="movie_genre" value="19"> 뮤지컬</label>
+      </td>
+    </tr>
+    <tr>
+      <td>줄거리</td>
+      <td><textarea name="movie_summary" cols="50" th:text="${movie.movie_summary}"></textarea></td>
+    </tr>
+    <tr>
+      <td>배우</td>
+      <td><textarea name="movie_actor" cols="50" th:text="${movie.movie_actor}"></textarea></td>
+    </tr>
+    <tr>
+      <td>감독</td>
+      <td><input type="text" name="movie_director" th:value="${movie.movie_director}" /></td>
+    </tr>
+  </table>
+  <span>OTT URL 수정<br>
+        OTT<textarea name="movie_ott" cols="50" th:text="${movie.movie_ott}"></textarea><br>
+        OTT링크들<textarea name="movie_ott_link" cols="50" th:text="${movie.movie_ott_link}"></textarea>
+    </span>
+
+  <input type="submit" value="작성 완료" />
+  <input type="reset" value="리셋" />
+  <input type="button" value="취소" onclick="history.go(-1)" />
+</form>
+</body>
+</html>

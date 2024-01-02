@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <!-- Basic need -->
+  <meta charset="UTF-8">
+  <title>Insert title here</title>
+  <script th:src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+</head>
+<body>
+<a th:href="@{/main}">
+  <img src="../resources/imgs/M&M_Characters.jpg" height="150">
+</a>
+<h3>회원가입</h3>
+
+<form th:action="@{/member/signup}" method="post" name="inputForm" onsubmit="return inputCheck()">
+  <div><!-- 정보 입력창 : 닉네임 이메일 비밀번호 MBTI-->
+
+    <!-- **********************************************email 입력 및 인증 관련************************************************************ -->
+    <div>
+      <div>
+        <!-- 기존에 가입된 이메일이 있을 경우 인증처리 못하게 ....
+              입력된 값과 DB에 id 확인해서 가입여부 처리    -->
+        이메일<input class="val_Check_Input" type="text" placeholder="email" name="member_email" id="member_email" autofocus>
+        <!-- 이메일 중복여부 결과 띄우기 -->
+        <button type="button" id="val_Check_Btn" >중복검사</button>
+        <!-- 중복 결과 값 띄워줄 창 -->
+        <span id ="val-check-warn"></span>
+
+      </div>
+      <button type="button" id="mail_Check_Btn" disabled="disabled">인증번호 받기</button>
+      <div>
+        <!-- input class 값이 있어야 blur 처리 할 수 있다 -->
+        <input class="mail_Check_Input" placeholder="인증번호 6자리 입력" disabled="disabled" maxlength="6" name="mail_Check_Input">
+      </div>
+      <!-- 인증번호 일치여부 확인 -->
+      <span id ="mail-check-warn"></span>
+    </div>
+    <!-- ******************************************************************************************************************************** -->
+
+    <div>
+      비밀번호<input type="password" name="member_pw" id="member_pw" disabled="disabled">
+    </div>
+
+    <div>
+      닉네임<input type="text" name="member_nickname" id="member_nickname" disabled="disabled"> <br/>
+    </div>
+
+    <div>
+      <div>MBTI</div>
+      <div>
+        <input type="radio" name="member_mbti" value="intj" disabled="disabled">INTJ
+        <input type="radio" name="member_mbti" value="intp" disabled="disabled">INTP
+        <input type="radio" name="member_mbti" value="entj" disabled="disabled">ENTJ
+        <input type="radio" name="member_mbti" value="entp" disabled="disabled">ENTP
+        <input type="radio" name="member_mbti" value="infj" disabled="disabled">INFJ
+        <input type="radio" name="member_mbti" value="infp" disabled="disabled">INFP
+        <input type="radio" name="member_mbti" value="enfj" disabled="disabled">ENFJ
+        <input type="radio" name="member_mbti" value="enfp" disabled="disabled">ENFP
+        <br/>
+        <input type="radio" name="member_mbti" value="istj" disabled="disabled">ISTJ
+        <input type="radio" name="member_mbti" value="isfj" disabled="disabled">ISFJ
+        <input type="radio" name="member_mbti" value="estj" disabled="disabled">ESTJ
+        <input type="radio" name="member_mbti" value="esfj" disabled="disabled">ESFJ
+        <input type="radio" name="member_mbti" value="istp" disabled="disabled">ISTP
+        <input type="radio" name="member_mbti" value="isfp" disabled="disabled">ISFP
+        <input type="radio" name="member_mbti" value="estp" disabled="disabled">ESTP
+        <input type="radio" name="member_mbti" value="esfp" disabled="disabled">ESFP
+        <br/>
+        <input type="radio" name="member_mbti" value="no" disabled="disabled">모름
+      </div>
+    </div>
+  </div>
+
+  <!--
+     약관 동의 안하면 알림창 띄우기
+
+     전체 약관 동의 할수있으면 적용
+     => 전체동의 체크박스 누르면 하위 체크박스 둘다 선택될수 있도록 설정 _추후 Jquery로 적용
+
+  <div>
+     <div>
+        <h4><input type="checkbox" name="terms" id="service">
+        <label for="service">M&M 이용약관</label></h4>
+        <div>이용약관... 입니다</div>
+
+        <h4><input type="checkbox" name="terms" id="personal">
+        <label for="personal">개인정보 수집 및 이용</label></h4>
+        <div>개인정보보호법에 따라 회원가입 신청하시는 분께 수집....</div>
+     </div>
+  </div>
+   -->
+
+
+  <div>
+    <input type="submit" value="회원가입">
+  </div>
+</form>
+
+<div>
+  <button type="button" onclick="history.go(-1)">취소</button> <!-- 회원가입 창 팝업처리 후 창 종료하도록 수정 필요 -->
+  <button type="button" onclick="window.location='/member/login'">로그인</button>
+</div>
+
+<script th:inline="javascript">
+   // 사용자가 email 입력란에 이메일 입력하고 중복검사 버튼 클릭-> 이벤트 발생
+   $("#val_Check_Btn").click(function(){
+      // 사용자가 입력한 email 값 가져오기
+      let email = $('#member_email').val();
+      console.log("member_email value : " + email);
+      let resultMsg = $("#val-check-warn");
+
+
+      // ajax 요청해서 입력한 memeber_email을 email변수에에 담아서 controller의 mailAvail에 보내고
+      // DB에 존재하는 email인지 결과 리턴받기-> true/false
+      $.ajax({
+         url:"/member/mailAvail",
+         type: "post",
+         data: {email:email},
+         success: function(result){
+            console.log("요청 성공!");
+            console.log("result : " + result);
+            code = result;
+            if(code === "true"){
+               resultMsg.html('사용가능합니다! 인증을 진행해주세요!');
+               resultMsg.css('color','green');
+               $('#mail_Check_Btn').attr('disabled',false);
+            }else{
+               resultMsg.html('이미 존재하는 이메일 입니다.');
+               resultMsg.css('color','red');
+            }
+         }
+      });
+   });
+
+</script>
+<script th:inline="javascript">
+   $('#mail_Check_Btn').click(function() {
+      const eamil = $('#member_email').val(); // 이메일 주소값 얻어오기!
+      console.log('완성된 이메일 : ' + eamil); // 이메일 오는지 확인
+      const checkInput = $('.mail_Check_Input') // 인증번호 입력하는곳
+
+      $.ajax({
+         type : 'get',
+         url : '/member/mailCheck?email='+eamil, // GET방식이라 Url 뒤에 email을 뭍힐수있다.
+         success : function (data) {
+            console.log("data : " +  data);
+            checkInput.attr('disabled',false);
+            code = data;
+            alert('인증번호가 전송되었습니다.')
+         }
+      }); // end ajax
+   }); // end send eamil
+
+   // 인증번호 비교
+   // focuse 에서 blur로 변경 될때 결과 값 span태그에 띄워주기
+   $('.mail_Check_Input').blur(function () {
+      console.log("blur 작동?")
+      const inputCode = $(this).val(); // const -> final과 비슷 상수값으로 설정
+      const resultMsg = $('#mail-check-warn'); // span태그의 id값 받아서 resultMsg 변수에 저장하고
+
+      if(inputCode === code){
+         resultMsg.html('인증번호가 일치합니다.'); // 결과 값에 따라서 변수에 저장되는 값 설정
+         resultMsg.css('color','green');
+         $('#mail_Check_Btn').attr('disabled',true);
+         $('#member_email').attr('readonly',true);
+         $('#mail_Check_Input').attr('readonly', true); // 인증번호 맞을시 잠금
+
+         $('#member_pw').attr('disabled',false); // pw 활성화
+         $('#member_nickname').attr('disabled',false); // 닉네임 활성화
+         $('input:radio[name=member_mbti]').attr('disabled',false); // mbti 선택 활성화
+
+      }else{
+         resultMsg.html('인증번호가 불일치 합니다. 다시 확인해주세요!.');
+         resultMsg.css('color','red');
+      }
+   });
+
+</script>
+<script th:inline="javascript">
+   //유효성 검사
+   function inputCheck(){
+      // 폼 정보 가져오기(form태그에 작성한 name 속성으로 form모두 가져오기 HTML->JS)
+      let inputs = document.inputForm;
+
+      // boolean, 값이 있는지 없는지 -> true/false
+      // 이메일 입력란 미작성 체크
+      if(!inputs.member_email.value) {
+         alert("이메일을 입력하세요");
+         // form tag에 false값이 넘어가면 submit 작동 x
+         return false;
+      }
+      // 인증번호 미작성 체크
+      if(!inputs.mail_Check_Input.value){
+         alert("인증을 계속 진행해주세요");
+         return false;
+      }
+      // 비밀번호 입력란 미작성 체크
+      if(!inputs.member_pw.value){
+         alert("비밀번호를 입력하세요");
+         return false;
+      }
+      // 닉네임란 미작성 체크
+      if(!inputs.member_nickname.value){
+         alert("닉네임을 입력하세요");
+         return false;
+      }
+      // MBTI란 미작성 체크
+      if(!inputs.member_mbti.value){
+         alert("MBTI를 선택해주세요");
+         return false;
+      }
+   }
+</script>
+
+
+</body>
+</html>

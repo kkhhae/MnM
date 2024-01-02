@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Basic need -->
+    <title>list</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <link rel="profile" href="#">
+
+    <!-- JQuery 라이브러리 추가 -->
+    <script th:src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+    <!--Google Font-->
+    <link rel="stylesheet" th:href="@{http://fonts.googleapis.com/css?family=Dosis:400,700,500|Nunito:300,400,600}" />
+
+    <!-- Mobile specific meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone-no">
+
+    <!-- CSS files -->
+    <link rel="stylesheet" th:href="@{/resources/MovieBoot/css/plugins.css}" />
+    <link rel="stylesheet" th:href="@{/resources/MovieBoot/css/style.css}" />
+</head>
+<body>
+<div class="hero common-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="hero-ct">
+                    <h1>검색결과</h1>
+                    <ul class="breadcumb">
+                        <li class="active"><a href="/movie/list">프로필 정보</a></li>
+                        <li><span class="ion-ios-arrow-right"></span>검색어 : [[${pager.pager.keyword}]]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="movie_no" th:value="${movie.movie_no}" />
+<input type="hidden" name="pageNum" th:value="${pager.pager.pageNum}" />
+<input type="hidden" name="listSize" th:value="${pager.pager.listSize}" />
+<input type="hidden" name="sel" th:value="${pager.pager.sel}" />
+<input type="hidden" name="keyword" th:value="${pager.pager.keyword}" />
+
+<div class="page-single">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="flex-wrap-movielist mv-grid-fw">
+                    <div th:each="member, status : ${members}">
+                        <div style="float: left; width: 50%;">
+                            <p><a class="followerCount" th:href="@{/member/otherMypage(email=${member.member_email})}">닉네임: [[${member.member_nickname}]]</a></p>
+                            <p><a class="followingCount" th:href="@{/member/otherMypage(email=${member.member_email})}">MBTI: [[${member.member_mbti}]]</a></p>
+                        </div>
+                        <div style="float: left; width: 50%;">
+                            <p>팔로워 : [[${followingCounts[status.index]}]]</p>
+                            <p>팔로잉 : [[${followerCounts[status.index]}]]</p>
+                            <button class="followButton" th:data-following="${member.member_no}" th:data-memberindex="${status.index}" th:if="${followStatus[status.index] == 0}">
+                                팔로우
+                            </button>
+                            <button class="followButton" th:data-following="${member.member_no}" th:data-memberindex="${status.index}" th:if="${followStatus[status.index] == 1}">
+                                팔로우 취소
+                            </button>
+                            <br>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+                <div class="topbar-filter">
+                    <label>Users / page: 10 users</label>
+                    <div class="pagination2">
+                        <div><a>페이지 : [[${pager.pager.pageNum}]]</a></div>
+                        <div th:if="${pager.prev}">
+                            <a th:href="@{/movie/list(pageNum=${pager.startPage-1},listSize=${pager.pager.listSize},sel=${pager.pager.sel},keyword=${pager.pager.keyword})}">&lt; previous &nbsp;</a>
+                        </div>
+                        <div th:each="num : ${#numbers.sequence(pager.startPage, pager.endPage)}">
+                            <a th:href="@{/movie/list(pageNum=${num},listSize=${pager.pager.listSize},sel=${pager.pager.sel},keyword=${pager.pager.keyword})}">
+                                &nbsp;[[${num}]]&nbsp;
+                            </a>
+                        </div>
+                        <div th:if="${pager.next}">
+                            <a th:href="@{/movie/list(pageNum=${pager.endPage+1},listSize=${pager.pager.listSize},sel=${pager.pager.sel},keyword=${pager.pager.keyword})}">&nbsp; next &gt;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        $(document).ready(function(){
+            let follower = "${sessionScope.member.member_no}"; //로그인한 사람의 member_no
+            console.log("follower : " + follower);
+
+            // 팔로우/팔로우 취소 버튼 클릭했을때 실행하는 코드
+            $(".followButton").click(function(e){
+                let btn = $(this); // 클릭한 버튼
+                let following = $(this).data("following"); // 팔로우하는 사람 member_no
+                console.log("following : " + following);
+                let followerCountTag = $(this).prev().prev(); // 팔로우 하는 사람의 팔로우 수 보여주는 태그
+                let followingCountTag = $(this).prev(); // 팔로우 하는 사람의 팔로잉 수 보여주는 태그
+                $.ajax({
+                    url: "/follow/add",
+                    type: "post",
+                    data: JSON.stringify({ member_no_follower: follower, member_no_following: following }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function(result){
+                        console.log("success");
+                        console.log(result); // FollowResultVO (follow, followerCount, followingCount)
+                        // 결과 가지고 버튼과 팔로우 한사람의 팔로우/팔로잉수 변경
+                        if(result.following) {
+                            btn.html("팔로우 취소");
+                        } else {
+                            btn.html("팔로우");
+                        }
+                        followerCountTag.html("팔로잉 : " + result.followerCount);
+                        followingCountTag.html("팔로워 : " + result.followingCount);
+                    },
+                    error: function(e){
+                        console.log("error.....");
+                        console.log(e);
+                    }
+                });
+
+            });// click
+        });
+    </script>
+</body>
+</html>

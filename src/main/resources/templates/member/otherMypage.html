@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{/layout/base :: setContent(~{this::content})}">
+
+<th:block th:fragment="content">
+
+<body>
+<div class="hero hero3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-single movie-single cebleb-single">
+    <div class="container">
+        <div class="row ipad-width">
+
+            <!-- 이미지가 있는 경우 이미지를 보여줌 -->
+            <th:block th:if="${not #strings.isEmpty(profileImageFileName) and profileImageFileName != null}">
+                <div class="movie-img">
+                    <img th:src="@{/member/images/{fileName}(fileName=${profileImageFileName})}" alt="프로필 이미지" width="150" height="150">
+                </div>
+            </th:block>
+
+            <!-- 이미지가 없는 경우 문구를 보여줌 -->
+            <th:block th:if="${#strings.isEmpty(profileImageFileName) or profileImageFileName == null}">
+                <div class="movie-img">
+                    <p>이미지가 없습니다.</p>
+                </div>
+            </th:block>
+
+            <div class="col-md-8 col-sm-12 col-xs-12">
+                <div class="movie-single-ct">
+                    <h1 class="bd-hd" th:text="${otherMember.member_nickname}"></h1>
+                    <p class="ceb-single">MBTI: <span th:text="${otherMember.member_mbti}"></span> </p>
+                    <p class="ceb-single">평균 별점: <span th:text="${starAvg}"></span> 개</p>
+                    <p class="ceb-single">찜한 작품 수: <span th:text="${wantCount}"></span> 개</p>
+                    <p class="ceb-single">리뷰 남긴 글 : <span th:text="${reviewCount}"></span> 개 </p>
+                    <p class="ceb-single">좋아요 누른 리뷰 수: <span th:text="${likeCount}"></span> 개</p>
+                    <p>팔로워 : <span th:text="${followerCount}"></span></p>
+                    <p>팔로잉 : <span th:text="${followingCount}"></span></p>
+
+                    <!-- 팔로우 버튼 -->
+                    <div th:if="${followStatus == 0}">
+                        <a class="followButton" th:data-following="${otherMember.member_no}" style="color: #8a4162;">팔로우</a>
+                    </div>
+                    <div th:if="${followStatus == 1}">
+                        <a class="followButton" th:data-following="${otherMember.member_no}" style="color: #8a4162;">팔로우 취소</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content">
+    <div id="overview" class="tab active">
+        <div class="row">
+            <div class="col-md-auto col-sm-12 col-xs-12">
+                <div class="title-hd-sm">
+                    <h4>작성한 리뷰 리스트</h4>
+                    <a href="/review/list" class="time">리뷰 전체보기<i class="ion-ios-arrow-right"></i></a>
+                </div>
+                <!-- 작성한 리스트들 -->
+                <div th:each="review : ${otherUserReviews}">
+                    <div class="mvcast-item">
+                        <div class="cast-it">
+                            <div class="cast-left cebleb-film">
+                                <img src="" alt="">
+                                <p>영화제목 : <span th:text="${review.movie_title}"></span></p>
+                                <a th:href="@{/review/{reviewNo}(reviewNo=${review.review_no} ,pageNum=1, listSize=10, email=${session.member.member_email})}" th:text="|리뷰 내용 : ${review.review_content}|">리뷰 내용</a>
+                                <p>작성자: <span th:text="${review.member_nickname}"></span></p>
+                                <p>작성날짜:<span th:text="${#temporals.format(review.getReview_reg(), 'yyyy-MM-dd')}"></span></p>
+                            </div>
+                            <div class="title-hd-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <form action="/member/write" method="post">
+        <div class="title-hd-sm">
+            <h4>방명록 남기기</h4>
+        </div>
+        <table>
+            <tr>
+                <td>
+                    <textarea rows="20" cols="40" name="content"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td class="container">
+                    <input type="hidden" name="otherMemberNo" th:value="${otherMember.member_no}">
+                    <input type="hidden" name="otherMemberEmail" th:value="${otherMember.member_email}">
+                    <input type="submit" value="저장"/>
+                    <input type="reset" value="재작성"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div class="tab-content">
+    <div id="overview" class="tab active">
+        <div class="row">
+            <div class="col-md-auto col-sm-12 col-xs-12">
+                <div class="title-hd-sm">
+                    <h4>방명록</h4>
+                </div>
+                <table>
+                    <thead>
+                    <tr style="border-left: 1px solid #000; border-right: 1px solid #000;">
+                        <th><p>작성자 닉네임</p></th>
+                        <th><p>작성자 mbti</p></th>
+                        <th><p>작성 내용</p></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <div th:each="visit : ${otherVisitList}">
+                        <tr>
+                            <td><p th:text="${visit.member_nickname}"></p></td>
+                            <td><p th:text="${visit.member_mbti}"></p></td>
+                            <td><p th:text="${visit.content}"></p></td>
+                            <td>
+                                <!-- 신고 버튼 표시 -->
+                                <a class="report-button">신고</a>
+
+                                <!-- 수정 버튼 -->
+                                <div th:if="${visit.member_no == session.member.member_no}">
+                                    <a class="edit-button">수정</a>
+                                </div>
+
+                                <!-- 삭제 버튼 -->
+                                <div th:if="${visit.member_no == session.member.member_no}">
+                                    <a class="delete-button" th:data-visitid="${visit.visit_no}">삭제</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- 수정 폼 -->
+                        <tr class="edit-form" style="display: none;">
+                            <td colspan="4">
+                                <form th:action="@{/member/updateVisit}" method="post">
+                                    <textarea rows="4" cols="50" name="content" th:text="${visit.content}"></textarea>
+                                    <input type="hidden" name="visit_no" th:value="${visit.visit_no}" />
+                                    <input type="hidden" name="email" th:value="${param.email}" />
+                                    <input type="submit" value="수정 완료" />
+                                    <button type="button" class="cancel-button">취소</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    // 방명록 수정 버튼 클릭 이벤트
+    $(".edit-button").click(function() {
+        let visitId = $(this).data("visitid"); // 방명록의 고유번호(visit_no) 가져오기
+        let visitContent = $(this).parent().prev().text(); // 수정 대상 방명록 내용 가져오기
+        // 수정 버튼 클릭 시 수정 폼 보이기
+        $(".edit-button").click(function() {
+            // 해당 방명록에 대한 수정 폼만 보이도록 함
+            $(this).closest("tr").next(".edit-form").show();
+        });
+    });
+
+    // 취소 버튼 클릭 시 수정 폼 숨기기
+    $(".cancel-button").click(function() {
+        $(this).closest(".edit-form").hide();
+    });
+
+    // 삭제 버튼 클릭 이벤트 처리
+    $(document).ready(function () {
+        $(document).on('click', '.delete-button', function () {
+            const visitId = $(this).data('visitid');
+            if (confirm('정말로 방명록을 삭제하시겠습니까?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/member/deleteVisit', // 삭제 처리를 담당하는 컨트롤러 URL
+                    data: { visit_no: visitId }, // 삭제할 방명록의 고유번호 전달
+                    success: function () {
+                        // 삭제가 성공하면 페이지를 리로드하여 삭제된 내용이 반영되도록 합니다.
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('방명록 삭제 실패: ', error);
+                    },
+                });
+            }
+        });
+    });
+
+    /* 팔로우/언팔로우 버튼 클릭 이벤트 */
+    $(document).ready(function(){
+        let follower = [[${session.member.member_no}]]; //로그인한 사람의 member_no
+        console.log("follower : " + follower);
+
+        // 팔로우/팔로우 취소 버튼 클릭했을때 실행하는 코드
+        $(".followButton").click(function(e){
+            let btn = $(this); // 클릭한 버튼
+            let following = $(this).data("following"); // 팔로우하는 사람 member_no
+            console.log("following : " + following);
+            let followerCountTag = $(this).parent().prev().prev(); // 팔로우 하는 사람의 팔로우 수 보여주는 태그
+            let followingCountTag = $(this).parent().prev(); // 팔로우 하는 사람의 팔로잉 수 보여주는 태그
+            $.ajax({
+                url: "/follow/add",
+                type: "post",
+                data: JSON.stringify({ member_no_follower: follower, member_no_following: following }),
+                contentType: "application/json; charset=utf-8",
+                success: function(result){
+                    console.log("success");
+                    console.log(result); // FollowResultVO (follow, followerCount, followingCount)
+                    // 결과 가지고 버튼과 팔로우 한사람의 팔로우/팔로잉수 변경
+                    if(result.following) {
+                        btn.html("팔로우 취소");
+                    } else {
+                        btn.html("팔로우");
+                    }
+                    followerCountTag.html("팔로워 : " + result.followerCount);
+                    followingCountTag.html("팔로잉 : " + result.followingCount);
+                },
+                error: function(e){
+                    console.log("error.....");
+                    console.log(e);
+                }
+            });
+        });
+    });
+</script>
+
+</th:block> <!-- fragment cotent -->
+
+</th:block> <!-- replace -->
